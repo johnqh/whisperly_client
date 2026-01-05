@@ -32,11 +32,12 @@ export class WhisperlyApiError extends Error {
 
 export async function handleApiResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
+    const text = await response.text();
     let details: unknown;
     try {
-      details = await response.json();
+      details = JSON.parse(text);
     } catch {
-      details = await response.text();
+      details = text;
     }
     throw new WhisperlyApiError(
       `API request failed: ${response.statusText}`,
