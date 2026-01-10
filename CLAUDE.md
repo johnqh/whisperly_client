@@ -3,6 +3,13 @@
 ## Project Overview
 `@sudobility/whisperly_client` is a React client library for the Whisperly API. It provides a typed API client class and TanStack Query hooks for seamless data fetching and mutations in React applications.
 
+## Platform Support
+- **Web App**: Yes
+- **React Native**: Yes
+- **Backend (Node.js/Bun)**: No (client-side only)
+
+This library is designed to work in both web and React Native environments. Tests use node environment to ensure no DOM-specific APIs are used.
+
 ## Tech Stack
 - **Runtime**: Bun
 - **Language**: TypeScript 5.9+
