@@ -11,13 +11,14 @@ export interface UseAnalyticsOptions {
 
 export function useAnalytics(
   client: WhisperlyClient,
+  entitySlug: string,
   options: UseAnalyticsOptions = {}
 ) {
   const { startDate, endDate, projectId, enabled = true } = options;
 
   return useQuery({
-    queryKey: [QUERY_KEYS.analytics, startDate, endDate, projectId],
-    queryFn: () => client.getAnalytics(startDate, endDate, projectId),
-    enabled,
+    queryKey: [QUERY_KEYS.analytics, entitySlug, startDate, endDate, projectId],
+    queryFn: () => client.getAnalytics(entitySlug, startDate, endDate, projectId),
+    enabled: enabled && !!entitySlug,
   });
 }

@@ -3,27 +3,32 @@ import type { GlossaryCreateRequest, GlossaryUpdateRequest } from '@sudobility/w
 import { WhisperlyClient } from '../network/WhisperlyClient';
 import { QUERY_KEYS } from '../types';
 
-export function useGlossaries(client: WhisperlyClient, projectId: string) {
+export function useGlossaries(
+  client: WhisperlyClient,
+  entitySlug: string,
+  projectId: string
+) {
   return useQuery({
-    queryKey: [QUERY_KEYS.glossaries, projectId],
-    queryFn: () => client.getGlossaries(projectId),
-    enabled: !!projectId,
+    queryKey: [QUERY_KEYS.glossaries, entitySlug, projectId],
+    queryFn: () => client.getGlossaries(entitySlug, projectId),
+    enabled: !!entitySlug && !!projectId,
   });
 }
 
 export function useGlossary(
   client: WhisperlyClient,
+  entitySlug: string,
   projectId: string,
   glossaryId: string
 ) {
   return useQuery({
-    queryKey: [QUERY_KEYS.glossary, projectId, glossaryId],
-    queryFn: () => client.getGlossary(projectId, glossaryId),
-    enabled: !!projectId && !!glossaryId,
+    queryKey: [QUERY_KEYS.glossary, entitySlug, projectId, glossaryId],
+    queryFn: () => client.getGlossary(entitySlug, projectId, glossaryId),
+    enabled: !!entitySlug && !!projectId && !!glossaryId,
   });
 }
 
-export function useCreateGlossary(client: WhisperlyClient) {
+export function useCreateGlossary(client: WhisperlyClient, entitySlug: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -33,16 +38,16 @@ export function useCreateGlossary(client: WhisperlyClient) {
     }: {
       projectId: string;
       data: GlossaryCreateRequest;
-    }) => client.createGlossary(projectId, data),
+    }) => client.createGlossary(entitySlug, projectId, data),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.glossaries, variables.projectId],
+        queryKey: [QUERY_KEYS.glossaries, entitySlug, variables.projectId],
       });
     },
   });
 }
 
-export function useUpdateGlossary(client: WhisperlyClient) {
+export function useUpdateGlossary(client: WhisperlyClient, entitySlug: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -54,14 +59,15 @@ export function useUpdateGlossary(client: WhisperlyClient) {
       projectId: string;
       glossaryId: string;
       data: GlossaryUpdateRequest;
-    }) => client.updateGlossary(projectId, glossaryId, data),
+    }) => client.updateGlossary(entitySlug, projectId, glossaryId, data),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.glossaries, variables.projectId],
+        queryKey: [QUERY_KEYS.glossaries, entitySlug, variables.projectId],
       });
       queryClient.invalidateQueries({
         queryKey: [
           QUERY_KEYS.glossary,
+          entitySlug,
           variables.projectId,
           variables.glossaryId,
         ],
@@ -70,7 +76,7 @@ export function useUpdateGlossary(client: WhisperlyClient) {
   });
 }
 
-export function useDeleteGlossary(client: WhisperlyClient) {
+export function useDeleteGlossary(client: WhisperlyClient, entitySlug: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -80,16 +86,16 @@ export function useDeleteGlossary(client: WhisperlyClient) {
     }: {
       projectId: string;
       glossaryId: string;
-    }) => client.deleteGlossary(projectId, glossaryId),
+    }) => client.deleteGlossary(entitySlug, projectId, glossaryId),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.glossaries, variables.projectId],
+        queryKey: [QUERY_KEYS.glossaries, entitySlug, variables.projectId],
       });
     },
   });
 }
 
-export function useImportGlossaries(client: WhisperlyClient) {
+export function useImportGlossaries(client: WhisperlyClient, entitySlug: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -99,16 +105,16 @@ export function useImportGlossaries(client: WhisperlyClient) {
     }: {
       projectId: string;
       glossaries: GlossaryCreateRequest[];
-    }) => client.importGlossaries(projectId, glossaries),
+    }) => client.importGlossaries(entitySlug, projectId, glossaries),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.glossaries, variables.projectId],
+        queryKey: [QUERY_KEYS.glossaries, entitySlug, variables.projectId],
       });
     },
   });
 }
 
-export function useExportGlossaries(client: WhisperlyClient) {
+export function useExportGlossaries(client: WhisperlyClient, entitySlug: string) {
   return useMutation({
     mutationFn: ({
       projectId,
@@ -116,6 +122,6 @@ export function useExportGlossaries(client: WhisperlyClient) {
     }: {
       projectId: string;
       format?: 'json' | 'csv';
-    }) => client.exportGlossaries(projectId, format),
+    }) => client.exportGlossaries(entitySlug, projectId, format),
   });
 }

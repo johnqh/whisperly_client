@@ -5,11 +5,15 @@ import { WhisperlyClient } from '../network/WhisperlyClient';
 export function useTranslate(client: WhisperlyClient) {
   return useMutation({
     mutationFn: ({
-      projectId,
+      orgPath,
+      projectName,
+      endpointName,
       request,
     }: {
-      projectId: string;
+      orgPath: string;
+      projectName: string;
+      endpointName: string;
       request: TranslationRequest;
-    }) => client.translate(projectId, request),
+    }) => client.translate(orgPath, projectName, endpointName, request),
   });
 }

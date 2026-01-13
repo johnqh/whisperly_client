@@ -8,11 +8,10 @@ import type {
   UserSettings,
   UserSettingsUpdateRequest,
   AnalyticsResponse,
-  Subscription,
   TranslationRequest,
   TranslationResponse,
 } from '@sudobility/whisperly_types';
-import type { WhisperlyClientConfig } from '../types';
+import type { WhisperlyClientConfig, Endpoint, EndpointCreateRequest, EndpointUpdateRequest } from '../types';
 import {
   createAuthHeaders,
   buildUrl,
@@ -29,20 +28,25 @@ export class WhisperlyClient {
     this.getIdToken = config.getIdToken;
   }
 
-  // Projects
-  async getProjects(): Promise<Project[]> {
+  // =============================================================================
+  // Projects (Entity-centric: /entities/:entitySlug/projects)
+  // =============================================================================
+  async getProjects(entitySlug: string): Promise<Project[]> {
     const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(buildUrl(this.baseUrl, '/projects'), {
-      method: 'GET',
-      headers,
-    });
+    const response = await fetch(
+      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects`),
+      {
+        method: 'GET',
+        headers,
+      }
+    );
     return handleApiResponse<Project[]>(response);
   }
 
-  async getProject(projectId: string): Promise<Project> {
+  async getProject(entitySlug: string, projectId: string): Promise<Project> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(this.baseUrl, `/projects/${projectId}`),
+      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects/${projectId}`),
       {
         method: 'GET',
         headers,
@@ -51,20 +55,27 @@ export class WhisperlyClient {
     return handleApiResponse<Project>(response);
   }
 
-  async createProject(data: ProjectCreateRequest): Promise<Project> {
+  async createProject(entitySlug: string, data: ProjectCreateRequest): Promise<Project> {
     const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(buildUrl(this.baseUrl, '/projects'), {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(data),
-    });
+    const response = await fetch(
+      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects`),
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(data),
+      }
+    );
     return handleApiResponse<Project>(response);
   }
 
-  async updateProject(projectId: string, data: ProjectUpdateRequest): Promise<Project> {
+  async updateProject(
+    entitySlug: string,
+    projectId: string,
+    data: ProjectUpdateRequest
+  ): Promise<Project> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(this.baseUrl, `/projects/${projectId}`),
+      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects/${projectId}`),
       {
         method: 'PUT',
         headers,
@@ -74,10 +85,10 @@ export class WhisperlyClient {
     return handleApiResponse<Project>(response);
   }
 
-  async deleteProject(projectId: string): Promise<void> {
+  async deleteProject(entitySlug: string, projectId: string): Promise<void> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(this.baseUrl, `/projects/${projectId}`),
+      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects/${projectId}`),
       {
         method: 'DELETE',
         headers,
@@ -88,11 +99,106 @@ export class WhisperlyClient {
     }
   }
 
-  // Glossaries
-  async getGlossaries(projectId: string): Promise<Glossary[]> {
+  // =============================================================================
+  // Endpoints (Entity-centric: /entities/:entitySlug/projects/:projectId/endpoints)
+  // =============================================================================
+  async getEndpoints(entitySlug: string, projectId: string): Promise<Endpoint[]> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(this.baseUrl, `/projects/${projectId}/glossaries`),
+      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects/${projectId}/endpoints`),
+      {
+        method: 'GET',
+        headers,
+      }
+    );
+    return handleApiResponse<Endpoint[]>(response);
+  }
+
+  async getEndpoint(
+    entitySlug: string,
+    projectId: string,
+    endpointId: string
+  ): Promise<Endpoint> {
+    const headers = await createAuthHeaders(this.getIdToken);
+    const response = await fetch(
+      buildUrl(
+        this.baseUrl,
+        `/entities/${entitySlug}/projects/${projectId}/endpoints/${endpointId}`
+      ),
+      {
+        method: 'GET',
+        headers,
+      }
+    );
+    return handleApiResponse<Endpoint>(response);
+  }
+
+  async createEndpoint(
+    entitySlug: string,
+    projectId: string,
+    data: EndpointCreateRequest
+  ): Promise<Endpoint> {
+    const headers = await createAuthHeaders(this.getIdToken);
+    const response = await fetch(
+      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects/${projectId}/endpoints`),
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(data),
+      }
+    );
+    return handleApiResponse<Endpoint>(response);
+  }
+
+  async updateEndpoint(
+    entitySlug: string,
+    projectId: string,
+    endpointId: string,
+    data: EndpointUpdateRequest
+  ): Promise<Endpoint> {
+    const headers = await createAuthHeaders(this.getIdToken);
+    const response = await fetch(
+      buildUrl(
+        this.baseUrl,
+        `/entities/${entitySlug}/projects/${projectId}/endpoints/${endpointId}`
+      ),
+      {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(data),
+      }
+    );
+    return handleApiResponse<Endpoint>(response);
+  }
+
+  async deleteEndpoint(
+    entitySlug: string,
+    projectId: string,
+    endpointId: string
+  ): Promise<void> {
+    const headers = await createAuthHeaders(this.getIdToken);
+    const response = await fetch(
+      buildUrl(
+        this.baseUrl,
+        `/entities/${entitySlug}/projects/${projectId}/endpoints/${endpointId}`
+      ),
+      {
+        method: 'DELETE',
+        headers,
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`Failed to delete endpoint: ${response.statusText}`);
+    }
+  }
+
+  // =============================================================================
+  // Glossaries (Entity-centric: /entities/:entitySlug/projects/:projectId/glossaries)
+  // =============================================================================
+  async getGlossaries(entitySlug: string, projectId: string): Promise<Glossary[]> {
+    const headers = await createAuthHeaders(this.getIdToken);
+    const response = await fetch(
+      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects/${projectId}/glossaries`),
       {
         method: 'GET',
         headers,
@@ -101,10 +207,17 @@ export class WhisperlyClient {
     return handleApiResponse<Glossary[]>(response);
   }
 
-  async getGlossary(projectId: string, glossaryId: string): Promise<Glossary> {
+  async getGlossary(
+    entitySlug: string,
+    projectId: string,
+    glossaryId: string
+  ): Promise<Glossary> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(this.baseUrl, `/projects/${projectId}/glossaries/${glossaryId}`),
+      buildUrl(
+        this.baseUrl,
+        `/entities/${entitySlug}/projects/${projectId}/glossaries/${glossaryId}`
+      ),
       {
         method: 'GET',
         headers,
@@ -114,12 +227,13 @@ export class WhisperlyClient {
   }
 
   async createGlossary(
+    entitySlug: string,
     projectId: string,
     data: GlossaryCreateRequest
   ): Promise<Glossary> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(this.baseUrl, `/projects/${projectId}/glossaries`),
+      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects/${projectId}/glossaries`),
       {
         method: 'POST',
         headers,
@@ -130,13 +244,17 @@ export class WhisperlyClient {
   }
 
   async updateGlossary(
+    entitySlug: string,
     projectId: string,
     glossaryId: string,
     data: GlossaryUpdateRequest
   ): Promise<Glossary> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(this.baseUrl, `/projects/${projectId}/glossaries/${glossaryId}`),
+      buildUrl(
+        this.baseUrl,
+        `/entities/${entitySlug}/projects/${projectId}/glossaries/${glossaryId}`
+      ),
       {
         method: 'PUT',
         headers,
@@ -146,10 +264,17 @@ export class WhisperlyClient {
     return handleApiResponse<Glossary>(response);
   }
 
-  async deleteGlossary(projectId: string, glossaryId: string): Promise<void> {
+  async deleteGlossary(
+    entitySlug: string,
+    projectId: string,
+    glossaryId: string
+  ): Promise<void> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(this.baseUrl, `/projects/${projectId}/glossaries/${glossaryId}`),
+      buildUrl(
+        this.baseUrl,
+        `/entities/${entitySlug}/projects/${projectId}/glossaries/${glossaryId}`
+      ),
       {
         method: 'DELETE',
         headers,
@@ -161,12 +286,16 @@ export class WhisperlyClient {
   }
 
   async importGlossaries(
+    entitySlug: string,
     projectId: string,
     glossaries: GlossaryCreateRequest[]
   ): Promise<Glossary[]> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(this.baseUrl, `/projects/${projectId}/glossaries/import`),
+      buildUrl(
+        this.baseUrl,
+        `/entities/${entitySlug}/projects/${projectId}/glossaries/import`
+      ),
       {
         method: 'POST',
         headers,
@@ -177,6 +306,7 @@ export class WhisperlyClient {
   }
 
   async exportGlossaries(
+    entitySlug: string,
     projectId: string,
     format: 'json' | 'csv' = 'json'
   ): Promise<string> {
@@ -184,7 +314,7 @@ export class WhisperlyClient {
     const response = await fetch(
       buildUrl(
         this.baseUrl,
-        `/projects/${projectId}/glossaries/export${formatQueryParams({ format })}`
+        `/entities/${entitySlug}/projects/${projectId}/glossaries/export${formatQueryParams({ format })}`
       ),
       {
         method: 'GET',
@@ -197,28 +327,39 @@ export class WhisperlyClient {
     return response.text();
   }
 
-  // Settings
-  async getSettings(): Promise<UserSettings> {
+  // =============================================================================
+  // Settings (User-specific: /users/:userId/settings)
+  // =============================================================================
+  async getSettings(userId: string): Promise<UserSettings> {
     const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(buildUrl(this.baseUrl, '/settings'), {
-      method: 'GET',
-      headers,
-    });
+    const response = await fetch(
+      buildUrl(this.baseUrl, `/users/${userId}/settings`),
+      {
+        method: 'GET',
+        headers,
+      }
+    );
     return handleApiResponse<UserSettings>(response);
   }
 
-  async updateSettings(data: UserSettingsUpdateRequest): Promise<UserSettings> {
+  async updateSettings(userId: string, data: UserSettingsUpdateRequest): Promise<UserSettings> {
     const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(buildUrl(this.baseUrl, '/settings'), {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify(data),
-    });
+    const response = await fetch(
+      buildUrl(this.baseUrl, `/users/${userId}/settings`),
+      {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(data),
+      }
+    );
     return handleApiResponse<UserSettings>(response);
   }
 
-  // Analytics
+  // =============================================================================
+  // Analytics (Entity-centric: /entities/:entitySlug/analytics)
+  // =============================================================================
   async getAnalytics(
+    entitySlug: string,
     startDate?: string,
     endDate?: string,
     projectId?: string
@@ -230,7 +371,7 @@ export class WhisperlyClient {
       project_id: projectId,
     });
     const response = await fetch(
-      buildUrl(this.baseUrl, `/analytics${params}`),
+      buildUrl(this.baseUrl, `/entities/${entitySlug}/analytics${params}`),
       {
         method: 'GET',
         headers,
@@ -239,36 +380,57 @@ export class WhisperlyClient {
     return handleApiResponse<AnalyticsResponse>(response);
   }
 
-  // Subscription
-  async getSubscription(): Promise<Subscription> {
+  // =============================================================================
+  // Rate Limits (Entity-centric: /ratelimits/:entitySlug)
+  // =============================================================================
+  async getRateLimits(entitySlug: string, testMode: boolean = false): Promise<unknown> {
     const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(buildUrl(this.baseUrl, '/subscription'), {
-      method: 'GET',
-      headers,
-    });
-    return handleApiResponse<Subscription>(response);
+    const params = testMode ? formatQueryParams({ testMode: 'true' }) : '';
+    const response = await fetch(
+      buildUrl(this.baseUrl, `/ratelimits/${entitySlug}${params}`),
+      {
+        method: 'GET',
+        headers,
+      }
+    );
+    return handleApiResponse<unknown>(response);
   }
 
-  async syncSubscription(): Promise<Subscription> {
+  async getRateLimitHistory(
+    entitySlug: string,
+    periodType: 'hour' | 'day' | 'month',
+    testMode: boolean = false
+  ): Promise<unknown> {
     const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(buildUrl(this.baseUrl, '/subscription/sync'), {
-      method: 'POST',
-      headers,
-    });
-    return handleApiResponse<Subscription>(response);
+    const params = testMode ? formatQueryParams({ testMode: 'true' }) : '';
+    const response = await fetch(
+      buildUrl(this.baseUrl, `/ratelimits/${entitySlug}/history/${periodType}${params}`),
+      {
+        method: 'GET',
+        headers,
+      }
+    );
+    return handleApiResponse<unknown>(response);
   }
 
-  // Translation
+  // =============================================================================
+  // Translation (Public: /translate/:orgPath/:projectName/:endpointName)
+  // Note: This endpoint is typically called without auth for consumer use
+  // =============================================================================
   async translate(
-    projectId: string,
+    orgPath: string,
+    projectName: string,
+    endpointName: string,
     request: TranslationRequest
   ): Promise<TranslationResponse> {
-    const headers = await createAuthHeaders(this.getIdToken);
+    // Translation endpoint is public, no auth needed
     const response = await fetch(
-      buildUrl(this.baseUrl, `/translate/${projectId}`),
+      buildUrl(this.baseUrl, `/translate/${orgPath}/${projectName}/${endpointName}`),
       {
         method: 'POST',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(request),
       }
     );

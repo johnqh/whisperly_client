@@ -5,6 +5,10 @@ export type {
   AuthHeaders,
   QueryKeys,
   UseFirebaseAuth,
+  HttpMethod,
+  Endpoint,
+  EndpointCreateRequest,
+  EndpointUpdateRequest,
 } from './types';
 export { QUERY_KEYS } from './types';
 
@@ -30,6 +34,14 @@ export {
 } from './hooks/useProjects';
 
 export {
+  useEndpoints,
+  useEndpoint,
+  useCreateEndpoint,
+  useUpdateEndpoint,
+  useDeleteEndpoint,
+} from './hooks/useEndpoints';
+
+export {
   useGlossaries,
   useGlossary,
   useCreateGlossary,
@@ -44,8 +56,6 @@ export { useSettings, useUpdateSettings } from './hooks/useSettings';
 export { useAnalytics } from './hooks/useAnalytics';
 export type { UseAnalyticsOptions } from './hooks/useAnalytics';
 
-export { useSubscription, useSyncSubscription } from './hooks/useSubscription';
-
 export { useTranslate } from './hooks/useTranslate';
 
 // Re-export types from whisperly_types for convenience
@@ -59,8 +69,6 @@ export type {
   UserSettings,
   UserSettingsUpdateRequest,
   AnalyticsResponse,
-  Subscription,
-  SubscriptionTier,
   TranslationRequest,
   TranslationResponse,
   GlossaryLookupResponse,

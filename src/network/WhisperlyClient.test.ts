@@ -10,6 +10,9 @@ describe('WhisperlyClient', () => {
   let client: WhisperlyClient;
   const mockGetIdToken = vi.fn();
   const baseUrl = 'https://api.example.com';
+  const entitySlug = 'my-org';
+  const userId = 'user-123';
+  const projectId = 'proj-1';
 
   const config: WhisperlyClientConfig = {
     baseUrl,
@@ -41,10 +44,10 @@ describe('WhisperlyClient', () => {
           json: () => Promise.resolve(mockProjects),
         });
 
-        const result = await client.getProjects();
+        const result = await client.getProjects(entitySlug);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/projects`,
+          `${baseUrl}/entities/${entitySlug}/projects`,
           expect.objectContaining({
             method: 'GET',
             headers: expect.objectContaining({
@@ -64,10 +67,10 @@ describe('WhisperlyClient', () => {
           json: () => Promise.resolve(mockProject),
         });
 
-        const result = await client.getProject('proj-1');
+        const result = await client.getProject(entitySlug, projectId);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/projects/proj-1`,
+          `${baseUrl}/entities/${entitySlug}/projects/${projectId}`,
           expect.objectContaining({ method: 'GET' })
         );
         expect(result).toEqual(mockProject);
@@ -76,17 +79,17 @@ describe('WhisperlyClient', () => {
 
     describe('createProject', () => {
       it('should create a project with POST request', async () => {
-        const createData = { name: 'New Project', source_language: 'en' };
+        const createData = { project_name: 'new-project', display_name: 'New Project' };
         const mockProject = { id: 'new-1', ...createData };
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: () => Promise.resolve(mockProject),
         });
 
-        const result = await client.createProject(createData);
+        const result = await client.createProject(entitySlug, createData);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/projects`,
+          `${baseUrl}/entities/${entitySlug}/projects`,
           expect.objectContaining({
             method: 'POST',
             body: JSON.stringify(createData),
@@ -98,17 +101,17 @@ describe('WhisperlyClient', () => {
 
     describe('updateProject', () => {
       it('should update a project with PUT request', async () => {
-        const updateData = { name: 'Updated Project' };
-        const mockProject = { id: 'proj-1', name: 'Updated Project' };
+        const updateData = { display_name: 'Updated Project' };
+        const mockProject = { id: 'proj-1', display_name: 'Updated Project' };
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: () => Promise.resolve(mockProject),
         });
 
-        const result = await client.updateProject('proj-1', updateData);
+        const result = await client.updateProject(entitySlug, projectId, updateData);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/projects/proj-1`,
+          `${baseUrl}/entities/${entitySlug}/projects/${projectId}`,
           expect.objectContaining({
             method: 'PUT',
             body: JSON.stringify(updateData),
@@ -122,10 +125,10 @@ describe('WhisperlyClient', () => {
       it('should delete a project with DELETE request', async () => {
         mockFetch.mockResolvedValueOnce({ ok: true });
 
-        await client.deleteProject('proj-1');
+        await client.deleteProject(entitySlug, projectId);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/projects/proj-1`,
+          `${baseUrl}/entities/${entitySlug}/projects/${projectId}`,
           expect.objectContaining({ method: 'DELETE' })
         );
       });
@@ -136,14 +139,84 @@ describe('WhisperlyClient', () => {
           statusText: 'Not Found',
         });
 
-        await expect(client.deleteProject('proj-1')).rejects.toThrow(
+        await expect(client.deleteProject(entitySlug, projectId)).rejects.toThrow(
           'Failed to delete project: Not Found'
         );
       });
     });
   });
 
+  describe('Endpoints', () => {
+    const endpointId = 'endpoint-1';
+
+    describe('getEndpoints', () => {
+      it('should fetch endpoints for a project', async () => {
+        const mockEndpoints = [{ id: 'e1', endpoint_name: 'translate' }];
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve(mockEndpoints),
+        });
+
+        const result = await client.getEndpoints(entitySlug, projectId);
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/endpoints`,
+          expect.objectContaining({ method: 'GET' })
+        );
+        expect(result).toEqual(mockEndpoints);
+      });
+    });
+
+    describe('createEndpoint', () => {
+      it('should create an endpoint with POST request', async () => {
+        const createData = { endpoint_name: 'translate', display_name: 'Translate' };
+        const mockEndpoint = { id: 'e1', ...createData };
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve(mockEndpoint),
+        });
+
+        const result = await client.createEndpoint(entitySlug, projectId, createData);
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/endpoints`,
+          expect.objectContaining({
+            method: 'POST',
+            body: JSON.stringify(createData),
+          })
+        );
+        expect(result).toEqual(mockEndpoint);
+      });
+    });
+
+    describe('deleteEndpoint', () => {
+      it('should delete an endpoint with DELETE request', async () => {
+        mockFetch.mockResolvedValueOnce({ ok: true });
+
+        await client.deleteEndpoint(entitySlug, projectId, endpointId);
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/endpoints/${endpointId}`,
+          expect.objectContaining({ method: 'DELETE' })
+        );
+      });
+
+      it('should throw error when delete fails', async () => {
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          statusText: 'Not Found',
+        });
+
+        await expect(client.deleteEndpoint(entitySlug, projectId, endpointId)).rejects.toThrow(
+          'Failed to delete endpoint: Not Found'
+        );
+      });
+    });
+  });
+
   describe('Glossaries', () => {
+    const glossaryId = 'g1';
+
     describe('getGlossaries', () => {
       it('should fetch glossaries for a project', async () => {
         const mockGlossaries = [{ id: 'g1', term: 'hello' }];
@@ -152,10 +225,10 @@ describe('WhisperlyClient', () => {
           json: () => Promise.resolve(mockGlossaries),
         });
 
-        const result = await client.getGlossaries('proj-1');
+        const result = await client.getGlossaries(entitySlug, projectId);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/projects/proj-1/glossaries`,
+          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/glossaries`,
           expect.objectContaining({ method: 'GET' })
         );
         expect(result).toEqual(mockGlossaries);
@@ -164,17 +237,17 @@ describe('WhisperlyClient', () => {
 
     describe('createGlossary', () => {
       it('should create a glossary entry', async () => {
-        const createData = { term: 'hello', translation: 'hola' };
+        const createData = { term: 'hello', translations: { es: 'hola' } };
         const mockGlossary = { id: 'g1', ...createData };
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: () => Promise.resolve(mockGlossary),
         });
 
-        const result = await client.createGlossary('proj-1', createData);
+        const result = await client.createGlossary(entitySlug, projectId, createData);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/projects/proj-1/glossaries`,
+          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/glossaries`,
           expect.objectContaining({
             method: 'POST',
             body: JSON.stringify(createData),
@@ -188,10 +261,10 @@ describe('WhisperlyClient', () => {
       it('should delete a glossary entry', async () => {
         mockFetch.mockResolvedValueOnce({ ok: true });
 
-        await client.deleteGlossary('proj-1', 'g1');
+        await client.deleteGlossary(entitySlug, projectId, glossaryId);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/projects/proj-1/glossaries/g1`,
+          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/glossaries/${glossaryId}`,
           expect.objectContaining({ method: 'DELETE' })
         );
       });
@@ -202,7 +275,7 @@ describe('WhisperlyClient', () => {
           statusText: 'Not Found',
         });
 
-        await expect(client.deleteGlossary('proj-1', 'g1')).rejects.toThrow(
+        await expect(client.deleteGlossary(entitySlug, projectId, glossaryId)).rejects.toThrow(
           'Failed to delete glossary: Not Found'
         );
       });
@@ -211,8 +284,8 @@ describe('WhisperlyClient', () => {
     describe('importGlossaries', () => {
       it('should import multiple glossaries', async () => {
         const glossaries = [
-          { term: 'hello', translation: 'hola' },
-          { term: 'world', translation: 'mundo' },
+          { term: 'hello', translations: { es: 'hola' } },
+          { term: 'world', translations: { es: 'mundo' } },
         ];
         const mockResult = [
           { id: 'g1', ...glossaries[0] },
@@ -223,10 +296,10 @@ describe('WhisperlyClient', () => {
           json: () => Promise.resolve(mockResult),
         });
 
-        const result = await client.importGlossaries('proj-1', glossaries);
+        const result = await client.importGlossaries(entitySlug, projectId, glossaries);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/projects/proj-1/glossaries/import`,
+          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/glossaries/import`,
           expect.objectContaining({
             method: 'POST',
             body: JSON.stringify({ glossaries }),
@@ -243,10 +316,10 @@ describe('WhisperlyClient', () => {
           text: () => Promise.resolve('[{"term": "hello"}]'),
         });
 
-        const result = await client.exportGlossaries('proj-1');
+        const result = await client.exportGlossaries(entitySlug, projectId);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/projects/proj-1/glossaries/export?format=json`,
+          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/glossaries/export?format=json`,
           expect.objectContaining({ method: 'GET' })
         );
         expect(result).toBe('[{"term": "hello"}]');
@@ -258,10 +331,10 @@ describe('WhisperlyClient', () => {
           text: () => Promise.resolve('term,translation\nhello,hola'),
         });
 
-        const result = await client.exportGlossaries('proj-1', 'csv');
+        const result = await client.exportGlossaries(entitySlug, projectId, 'csv');
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/projects/proj-1/glossaries/export?format=csv`,
+          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/glossaries/export?format=csv`,
           expect.objectContaining({ method: 'GET' })
         );
         expect(result).toBe('term,translation\nhello,hola');
@@ -278,10 +351,10 @@ describe('WhisperlyClient', () => {
           json: () => Promise.resolve(mockSettings),
         });
 
-        const result = await client.getSettings();
+        const result = await client.getSettings(userId);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/settings`,
+          `${baseUrl}/users/${userId}/settings`,
           expect.objectContaining({ method: 'GET' })
         );
         expect(result).toEqual(mockSettings);
@@ -297,10 +370,10 @@ describe('WhisperlyClient', () => {
           json: () => Promise.resolve(mockSettings),
         });
 
-        const result = await client.updateSettings(updateData);
+        const result = await client.updateSettings(userId, updateData);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/settings`,
+          `${baseUrl}/users/${userId}/settings`,
           expect.objectContaining({
             method: 'PUT',
             body: JSON.stringify(updateData),
@@ -320,10 +393,10 @@ describe('WhisperlyClient', () => {
           json: () => Promise.resolve(mockAnalytics),
         });
 
-        const result = await client.getAnalytics();
+        const result = await client.getAnalytics(entitySlug);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/analytics`,
+          `${baseUrl}/entities/${entitySlug}/analytics`,
           expect.objectContaining({ method: 'GET' })
         );
         expect(result).toEqual(mockAnalytics);
@@ -336,7 +409,7 @@ describe('WhisperlyClient', () => {
           json: () => Promise.resolve(mockAnalytics),
         });
 
-        await client.getAnalytics('2024-01-01', '2024-01-31');
+        await client.getAnalytics(entitySlug, '2024-01-01', '2024-01-31');
 
         expect(mockFetch).toHaveBeenCalledWith(
           expect.stringContaining('start_date=2024-01-01'),
@@ -355,7 +428,7 @@ describe('WhisperlyClient', () => {
           json: () => Promise.resolve(mockAnalytics),
         });
 
-        await client.getAnalytics(undefined, undefined, 'proj-1');
+        await client.getAnalytics(entitySlug, undefined, undefined, projectId);
 
         expect(mockFetch).toHaveBeenCalledWith(
           expect.stringContaining('project_id=proj-1'),
@@ -365,40 +438,36 @@ describe('WhisperlyClient', () => {
     });
   });
 
-  describe('Subscription', () => {
-    describe('getSubscription', () => {
-      it('should fetch subscription status', async () => {
-        const mockSubscription = { tier: 'pro', active: true };
+  describe('Rate Limits', () => {
+    describe('getRateLimits', () => {
+      it('should fetch rate limits for entity', async () => {
+        const mockLimits = { hourly: { remaining: 100 } };
         mockFetch.mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve(mockSubscription),
+          json: () => Promise.resolve(mockLimits),
         });
 
-        const result = await client.getSubscription();
+        const result = await client.getRateLimits(entitySlug);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/subscription`,
+          `${baseUrl}/ratelimits/${entitySlug}`,
           expect.objectContaining({ method: 'GET' })
         );
-        expect(result).toEqual(mockSubscription);
+        expect(result).toEqual(mockLimits);
       });
-    });
 
-    describe('syncSubscription', () => {
-      it('should sync subscription with POST request', async () => {
-        const mockSubscription = { tier: 'pro', active: true };
+      it('should include testMode parameter when specified', async () => {
         mockFetch.mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve(mockSubscription),
+          json: () => Promise.resolve({}),
         });
 
-        const result = await client.syncSubscription();
+        await client.getRateLimits(entitySlug, true);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/subscription/sync`,
-          expect.objectContaining({ method: 'POST' })
+          `${baseUrl}/ratelimits/${entitySlug}?testMode=true`,
+          expect.any(Object)
         );
-        expect(result).toEqual(mockSubscription);
       });
     });
   });
@@ -408,20 +477,20 @@ describe('WhisperlyClient', () => {
       it('should send translation request', async () => {
         const request = {
           strings: ['Hello', 'World'],
-          target_language: 'es',
+          target_languages: ['es'],
         };
         const mockResponse = {
-          translations: ['Hola', 'Mundo'],
+          translations: { es: ['Hola', 'Mundo'] },
         };
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: () => Promise.resolve(mockResponse),
         });
 
-        const result = await client.translate('proj-1', request);
+        const result = await client.translate('my-org', 'my-project', 'translate', request);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/translate/proj-1`,
+          `${baseUrl}/translate/my-org/my-project/translate`,
           expect.objectContaining({
             method: 'POST',
             body: JSON.stringify(request),
@@ -436,7 +505,7 @@ describe('WhisperlyClient', () => {
     it('should throw when token is not available', async () => {
       mockGetIdToken.mockResolvedValueOnce(undefined);
 
-      await expect(client.getProjects()).rejects.toThrow();
+      await expect(client.getProjects(entitySlug)).rejects.toThrow();
     });
   });
 });
