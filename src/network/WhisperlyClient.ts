@@ -22,10 +22,15 @@ import {
 export class WhisperlyClient {
   private baseUrl: string;
   private getIdToken: () => Promise<string | undefined>;
+  private apiPrefix = '/api/v1';
 
   constructor(config: WhisperlyClientConfig) {
     this.baseUrl = config.baseUrl;
     this.getIdToken = config.getIdToken;
+  }
+
+  private url(path: string): string {
+    return buildUrl(this.baseUrl, `${this.apiPrefix}${path}`);
   }
 
   // =============================================================================
@@ -34,7 +39,7 @@ export class WhisperlyClient {
   async getProjects(entitySlug: string): Promise<Project[]> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects`),
+      this.url(`/entities/${entitySlug}/projects`),
       {
         method: 'GET',
         headers,
@@ -46,7 +51,7 @@ export class WhisperlyClient {
   async getProject(entitySlug: string, projectId: string): Promise<Project> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects/${projectId}`),
+      this.url(`/entities/${entitySlug}/projects/${projectId}`),
       {
         method: 'GET',
         headers,
@@ -58,7 +63,7 @@ export class WhisperlyClient {
   async createProject(entitySlug: string, data: ProjectCreateRequest): Promise<Project> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects`),
+      this.url(`/entities/${entitySlug}/projects`),
       {
         method: 'POST',
         headers,
@@ -75,7 +80,7 @@ export class WhisperlyClient {
   ): Promise<Project> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects/${projectId}`),
+      this.url(`/entities/${entitySlug}/projects/${projectId}`),
       {
         method: 'PUT',
         headers,
@@ -88,7 +93,7 @@ export class WhisperlyClient {
   async deleteProject(entitySlug: string, projectId: string): Promise<void> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects/${projectId}`),
+      this.url(`/entities/${entitySlug}/projects/${projectId}`),
       {
         method: 'DELETE',
         headers,
@@ -110,10 +115,7 @@ export class WhisperlyClient {
   ): Promise<DictionarySearchResponse> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(
-        this.baseUrl,
-        `/entities/${entitySlug}/projects/${projectId}/dictionary/search/${encodeURIComponent(languageCode)}/${encodeURIComponent(text)}`
-      ),
+      this.url(`/entities/${entitySlug}/projects/${projectId}/dictionary/search/${encodeURIComponent(languageCode)}/${encodeURIComponent(text)}`),
       {
         method: 'GET',
         headers,
@@ -129,7 +131,7 @@ export class WhisperlyClient {
   ): Promise<DictionarySearchResponse> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects/${projectId}/dictionary`),
+      this.url(`/entities/${entitySlug}/projects/${projectId}/dictionary`),
       {
         method: 'POST',
         headers,
@@ -147,10 +149,7 @@ export class WhisperlyClient {
   ): Promise<DictionarySearchResponse> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(
-        this.baseUrl,
-        `/entities/${entitySlug}/projects/${projectId}/dictionary/${dictionaryId}`
-      ),
+      this.url(`/entities/${entitySlug}/projects/${projectId}/dictionary/${dictionaryId}`),
       {
         method: 'PUT',
         headers,
@@ -167,10 +166,7 @@ export class WhisperlyClient {
   ): Promise<DictionarySearchResponse> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(
-        this.baseUrl,
-        `/entities/${entitySlug}/projects/${projectId}/dictionary/${dictionaryId}`
-      ),
+      this.url(`/entities/${entitySlug}/projects/${projectId}/dictionary/${dictionaryId}`),
       {
         method: 'DELETE',
         headers,
@@ -185,7 +181,7 @@ export class WhisperlyClient {
   async getSettings(userId: string): Promise<UserSettings> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(this.baseUrl, `/users/${userId}/settings`),
+      this.url(`/users/${userId}/settings`),
       {
         method: 'GET',
         headers,
@@ -197,7 +193,7 @@ export class WhisperlyClient {
   async updateSettings(userId: string, data: UserSettingsUpdateRequest): Promise<UserSettings> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(this.baseUrl, `/users/${userId}/settings`),
+      this.url(`/users/${userId}/settings`),
       {
         method: 'PUT',
         headers,
@@ -223,7 +219,7 @@ export class WhisperlyClient {
       project_id: projectId,
     });
     const response = await fetch(
-      buildUrl(this.baseUrl, `/entities/${entitySlug}/analytics${params}`),
+      this.url(`/entities/${entitySlug}/analytics${params}`),
       {
         method: 'GET',
         headers,
@@ -239,7 +235,7 @@ export class WhisperlyClient {
     const headers = await createAuthHeaders(this.getIdToken);
     const params = testMode ? formatQueryParams({ testMode: 'true' }) : '';
     const response = await fetch(
-      buildUrl(this.baseUrl, `/ratelimits/${entitySlug}${params}`),
+      this.url(`/ratelimits/${entitySlug}${params}`),
       {
         method: 'GET',
         headers,
@@ -256,7 +252,7 @@ export class WhisperlyClient {
     const headers = await createAuthHeaders(this.getIdToken);
     const params = testMode ? formatQueryParams({ testMode: 'true' }) : '';
     const response = await fetch(
-      buildUrl(this.baseUrl, `/ratelimits/${entitySlug}/history/${periodType}${params}`),
+      this.url(`/ratelimits/${entitySlug}/history/${periodType}${params}`),
       {
         method: 'GET',
         headers,
@@ -276,7 +272,7 @@ export class WhisperlyClient {
   ): Promise<TranslationResponse> {
     // Translation endpoint is public, no auth needed
     const response = await fetch(
-      buildUrl(this.baseUrl, `/translate/${orgPath}/${projectName}`),
+      this.url(`/translate/${orgPath}/${projectName}`),
       {
         method: 'POST',
         headers: {

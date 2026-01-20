@@ -10,6 +10,7 @@ describe('WhisperlyClient', () => {
   let client: WhisperlyClient;
   const mockGetIdToken = vi.fn();
   const baseUrl = 'https://api.example.com';
+  const apiPrefix = '/api/v1';
   const entitySlug = 'my-org';
   const userId = 'user-123';
   const projectId = 'proj-1';
@@ -47,7 +48,7 @@ describe('WhisperlyClient', () => {
         const result = await client.getProjects(entitySlug);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/projects`,
+          `${baseUrl}${apiPrefix}/entities/${entitySlug}/projects`,
           expect.objectContaining({
             method: 'GET',
             headers: expect.objectContaining({
@@ -70,7 +71,7 @@ describe('WhisperlyClient', () => {
         const result = await client.getProject(entitySlug, projectId);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/projects/${projectId}`,
+          `${baseUrl}${apiPrefix}/entities/${entitySlug}/projects/${projectId}`,
           expect.objectContaining({ method: 'GET' })
         );
         expect(result).toEqual(mockProject);
@@ -89,7 +90,7 @@ describe('WhisperlyClient', () => {
         const result = await client.createProject(entitySlug, createData);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/projects`,
+          `${baseUrl}${apiPrefix}/entities/${entitySlug}/projects`,
           expect.objectContaining({
             method: 'POST',
             body: JSON.stringify(createData),
@@ -111,7 +112,7 @@ describe('WhisperlyClient', () => {
         const result = await client.updateProject(entitySlug, projectId, updateData);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/projects/${projectId}`,
+          `${baseUrl}${apiPrefix}/entities/${entitySlug}/projects/${projectId}`,
           expect.objectContaining({
             method: 'PUT',
             body: JSON.stringify(updateData),
@@ -128,7 +129,7 @@ describe('WhisperlyClient', () => {
         await client.deleteProject(entitySlug, projectId);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/projects/${projectId}`,
+          `${baseUrl}${apiPrefix}/entities/${entitySlug}/projects/${projectId}`,
           expect.objectContaining({ method: 'DELETE' })
         );
       });
@@ -160,7 +161,7 @@ describe('WhisperlyClient', () => {
         const result = await client.searchDictionary(entitySlug, projectId, 'en', 'hello');
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/dictionary/search/en/hello`,
+          `${baseUrl}${apiPrefix}/entities/${entitySlug}/projects/${projectId}/dictionary/search/en/hello`,
           expect.objectContaining({ method: 'GET' })
         );
         expect(result).toEqual(mockResult);
@@ -179,7 +180,7 @@ describe('WhisperlyClient', () => {
         const result = await client.createDictionary(entitySlug, projectId, createData);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/dictionary`,
+          `${baseUrl}${apiPrefix}/entities/${entitySlug}/projects/${projectId}/dictionary`,
           expect.objectContaining({
             method: 'POST',
             body: JSON.stringify(createData),
@@ -201,7 +202,7 @@ describe('WhisperlyClient', () => {
         const result = await client.updateDictionary(entitySlug, projectId, dictionaryId, updateData);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/dictionary/${dictionaryId}`,
+          `${baseUrl}${apiPrefix}/entities/${entitySlug}/projects/${projectId}/dictionary/${dictionaryId}`,
           expect.objectContaining({
             method: 'PUT',
             body: JSON.stringify(updateData),
@@ -222,7 +223,7 @@ describe('WhisperlyClient', () => {
         const result = await client.deleteDictionary(entitySlug, projectId, dictionaryId);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/dictionary/${dictionaryId}`,
+          `${baseUrl}${apiPrefix}/entities/${entitySlug}/projects/${projectId}/dictionary/${dictionaryId}`,
           expect.objectContaining({ method: 'DELETE' })
         );
         expect(result).toEqual(mockResult);
@@ -242,7 +243,7 @@ describe('WhisperlyClient', () => {
         const result = await client.getSettings(userId);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/users/${userId}/settings`,
+          `${baseUrl}${apiPrefix}/users/${userId}/settings`,
           expect.objectContaining({ method: 'GET' })
         );
         expect(result).toEqual(mockSettings);
@@ -261,7 +262,7 @@ describe('WhisperlyClient', () => {
         const result = await client.updateSettings(userId, updateData);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/users/${userId}/settings`,
+          `${baseUrl}${apiPrefix}/users/${userId}/settings`,
           expect.objectContaining({
             method: 'PUT',
             body: JSON.stringify(updateData),
@@ -284,7 +285,7 @@ describe('WhisperlyClient', () => {
         const result = await client.getAnalytics(entitySlug);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/analytics`,
+          `${baseUrl}${apiPrefix}/entities/${entitySlug}/analytics`,
           expect.objectContaining({ method: 'GET' })
         );
         expect(result).toEqual(mockAnalytics);
@@ -338,7 +339,7 @@ describe('WhisperlyClient', () => {
         const result = await client.getRateLimits(entitySlug);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/ratelimits/${entitySlug}`,
+          `${baseUrl}${apiPrefix}/ratelimits/${entitySlug}`,
           expect.objectContaining({ method: 'GET' })
         );
         expect(result).toEqual(mockLimits);
@@ -353,7 +354,7 @@ describe('WhisperlyClient', () => {
         await client.getRateLimits(entitySlug, true);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/ratelimits/${entitySlug}?testMode=true`,
+          `${baseUrl}${apiPrefix}/ratelimits/${entitySlug}?testMode=true`,
           expect.any(Object)
         );
       });
@@ -378,7 +379,7 @@ describe('WhisperlyClient', () => {
         const result = await client.translate('my-org', 'my-project', request);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/translate/my-org/my-project`,
+          `${baseUrl}${apiPrefix}/translate/my-org/my-project`,
           expect.objectContaining({
             method: 'POST',
             body: JSON.stringify(request),
