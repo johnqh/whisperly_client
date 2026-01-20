@@ -2,16 +2,16 @@ import type {
   Project,
   ProjectCreateRequest,
   ProjectUpdateRequest,
-  Glossary,
-  GlossaryCreateRequest,
-  GlossaryUpdateRequest,
+  DictionaryCreateRequest,
+  DictionaryUpdateRequest,
+  DictionarySearchResponse,
   UserSettings,
   UserSettingsUpdateRequest,
   AnalyticsResponse,
   TranslationRequest,
   TranslationResponse,
 } from '@sudobility/whisperly_types';
-import type { WhisperlyClientConfig, Endpoint, EndpointCreateRequest, EndpointUpdateRequest } from '../types';
+import type { WhisperlyClientConfig } from '../types';
 import {
   createAuthHeaders,
   buildUrl,
@@ -100,67 +100,56 @@ export class WhisperlyClient {
   }
 
   // =============================================================================
-  // Endpoints (Entity-centric: /entities/:entitySlug/projects/:projectId/endpoints)
+  // Dictionary (Entity-centric: /entities/:entitySlug/projects/:projectId/dictionary)
   // =============================================================================
-  async getEndpoints(entitySlug: string, projectId: string): Promise<Endpoint[]> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects/${projectId}/endpoints`),
-      {
-        method: 'GET',
-        headers,
-      }
-    );
-    return handleApiResponse<Endpoint[]>(response);
-  }
-
-  async getEndpoint(
+  async searchDictionary(
     entitySlug: string,
     projectId: string,
-    endpointId: string
-  ): Promise<Endpoint> {
+    languageCode: string,
+    text: string
+  ): Promise<DictionarySearchResponse> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
       buildUrl(
         this.baseUrl,
-        `/entities/${entitySlug}/projects/${projectId}/endpoints/${endpointId}`
+        `/entities/${entitySlug}/projects/${projectId}/dictionary/search/${encodeURIComponent(languageCode)}/${encodeURIComponent(text)}`
       ),
       {
         method: 'GET',
         headers,
       }
     );
-    return handleApiResponse<Endpoint>(response);
+    return handleApiResponse<DictionarySearchResponse>(response);
   }
 
-  async createEndpoint(
+  async createDictionary(
     entitySlug: string,
     projectId: string,
-    data: EndpointCreateRequest
-  ): Promise<Endpoint> {
+    data: DictionaryCreateRequest
+  ): Promise<DictionarySearchResponse> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
-      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects/${projectId}/endpoints`),
+      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects/${projectId}/dictionary`),
       {
         method: 'POST',
         headers,
         body: JSON.stringify(data),
       }
     );
-    return handleApiResponse<Endpoint>(response);
+    return handleApiResponse<DictionarySearchResponse>(response);
   }
 
-  async updateEndpoint(
+  async updateDictionary(
     entitySlug: string,
     projectId: string,
-    endpointId: string,
-    data: EndpointUpdateRequest
-  ): Promise<Endpoint> {
+    dictionaryId: string,
+    data: DictionaryUpdateRequest
+  ): Promise<DictionarySearchResponse> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
       buildUrl(
         this.baseUrl,
-        `/entities/${entitySlug}/projects/${projectId}/endpoints/${endpointId}`
+        `/entities/${entitySlug}/projects/${projectId}/dictionary/${dictionaryId}`
       ),
       {
         method: 'PUT',
@@ -168,163 +157,26 @@ export class WhisperlyClient {
         body: JSON.stringify(data),
       }
     );
-    return handleApiResponse<Endpoint>(response);
+    return handleApiResponse<DictionarySearchResponse>(response);
   }
 
-  async deleteEndpoint(
+  async deleteDictionary(
     entitySlug: string,
     projectId: string,
-    endpointId: string
-  ): Promise<void> {
+    dictionaryId: string
+  ): Promise<DictionarySearchResponse> {
     const headers = await createAuthHeaders(this.getIdToken);
     const response = await fetch(
       buildUrl(
         this.baseUrl,
-        `/entities/${entitySlug}/projects/${projectId}/endpoints/${endpointId}`
+        `/entities/${entitySlug}/projects/${projectId}/dictionary/${dictionaryId}`
       ),
       {
         method: 'DELETE',
         headers,
       }
     );
-    if (!response.ok) {
-      throw new Error(`Failed to delete endpoint: ${response.statusText}`);
-    }
-  }
-
-  // =============================================================================
-  // Glossaries (Entity-centric: /entities/:entitySlug/projects/:projectId/glossaries)
-  // =============================================================================
-  async getGlossaries(entitySlug: string, projectId: string): Promise<Glossary[]> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects/${projectId}/glossaries`),
-      {
-        method: 'GET',
-        headers,
-      }
-    );
-    return handleApiResponse<Glossary[]>(response);
-  }
-
-  async getGlossary(
-    entitySlug: string,
-    projectId: string,
-    glossaryId: string
-  ): Promise<Glossary> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      buildUrl(
-        this.baseUrl,
-        `/entities/${entitySlug}/projects/${projectId}/glossaries/${glossaryId}`
-      ),
-      {
-        method: 'GET',
-        headers,
-      }
-    );
-    return handleApiResponse<Glossary>(response);
-  }
-
-  async createGlossary(
-    entitySlug: string,
-    projectId: string,
-    data: GlossaryCreateRequest
-  ): Promise<Glossary> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      buildUrl(this.baseUrl, `/entities/${entitySlug}/projects/${projectId}/glossaries`),
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(data),
-      }
-    );
-    return handleApiResponse<Glossary>(response);
-  }
-
-  async updateGlossary(
-    entitySlug: string,
-    projectId: string,
-    glossaryId: string,
-    data: GlossaryUpdateRequest
-  ): Promise<Glossary> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      buildUrl(
-        this.baseUrl,
-        `/entities/${entitySlug}/projects/${projectId}/glossaries/${glossaryId}`
-      ),
-      {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(data),
-      }
-    );
-    return handleApiResponse<Glossary>(response);
-  }
-
-  async deleteGlossary(
-    entitySlug: string,
-    projectId: string,
-    glossaryId: string
-  ): Promise<void> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      buildUrl(
-        this.baseUrl,
-        `/entities/${entitySlug}/projects/${projectId}/glossaries/${glossaryId}`
-      ),
-      {
-        method: 'DELETE',
-        headers,
-      }
-    );
-    if (!response.ok) {
-      throw new Error(`Failed to delete glossary: ${response.statusText}`);
-    }
-  }
-
-  async importGlossaries(
-    entitySlug: string,
-    projectId: string,
-    glossaries: GlossaryCreateRequest[]
-  ): Promise<Glossary[]> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      buildUrl(
-        this.baseUrl,
-        `/entities/${entitySlug}/projects/${projectId}/glossaries/import`
-      ),
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ glossaries }),
-      }
-    );
-    return handleApiResponse<Glossary[]>(response);
-  }
-
-  async exportGlossaries(
-    entitySlug: string,
-    projectId: string,
-    format: 'json' | 'csv' = 'json'
-  ): Promise<string> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      buildUrl(
-        this.baseUrl,
-        `/entities/${entitySlug}/projects/${projectId}/glossaries/export${formatQueryParams({ format })}`
-      ),
-      {
-        method: 'GET',
-        headers,
-      }
-    );
-    if (!response.ok) {
-      throw new Error(`Failed to export glossaries: ${response.statusText}`);
-    }
-    return response.text();
+    return handleApiResponse<DictionarySearchResponse>(response);
   }
 
   // =============================================================================
@@ -414,18 +266,17 @@ export class WhisperlyClient {
   }
 
   // =============================================================================
-  // Translation (Public: /translate/:orgPath/:projectName/:endpointName)
+  // Translation (Public: /translate/:orgPath/:projectName)
   // Note: This endpoint is typically called without auth for consumer use
   // =============================================================================
   async translate(
     orgPath: string,
     projectName: string,
-    endpointName: string,
     request: TranslationRequest
   ): Promise<TranslationResponse> {
     // Translation endpoint is public, no auth needed
     const response = await fetch(
-      buildUrl(this.baseUrl, `/translate/${orgPath}/${projectName}/${endpointName}`),
+      buildUrl(this.baseUrl, `/translate/${orgPath}/${projectName}`),
       {
         method: 'POST',
         headers: {

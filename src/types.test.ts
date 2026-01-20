@@ -6,8 +6,8 @@ describe('types', () => {
     it('should have all expected query keys', () => {
       expect(QUERY_KEYS.projects).toBe('whisperly-projects');
       expect(QUERY_KEYS.project).toBe('whisperly-project');
-      expect(QUERY_KEYS.glossaries).toBe('whisperly-glossaries');
-      expect(QUERY_KEYS.glossary).toBe('whisperly-glossary');
+      expect(QUERY_KEYS.dictionary).toBe('whisperly-dictionary');
+      expect(QUERY_KEYS.dictionarySearch).toBe('whisperly-dictionary-search');
       expect(QUERY_KEYS.settings).toBe('whisperly-settings');
       expect(QUERY_KEYS.analytics).toBe('whisperly-analytics');
       expect(QUERY_KEYS.subscription).toBe('whisperly-subscription');

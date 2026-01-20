@@ -146,198 +146,86 @@ describe('WhisperlyClient', () => {
     });
   });
 
-  describe('Endpoints', () => {
-    const endpointId = 'endpoint-1';
+  describe('Dictionary', () => {
+    const dictionaryId = 'd1';
 
-    describe('getEndpoints', () => {
-      it('should fetch endpoints for a project', async () => {
-        const mockEndpoints = [{ id: 'e1', endpoint_name: 'translate' }];
-        mockFetch.mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockEndpoints),
-        });
-
-        const result = await client.getEndpoints(entitySlug, projectId);
-
-        expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/endpoints`,
-          expect.objectContaining({ method: 'GET' })
-        );
-        expect(result).toEqual(mockEndpoints);
-      });
-    });
-
-    describe('createEndpoint', () => {
-      it('should create an endpoint with POST request', async () => {
-        const createData = { endpoint_name: 'translate', display_name: 'Translate' };
-        const mockEndpoint = { id: 'e1', ...createData };
-        mockFetch.mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockEndpoint),
-        });
-
-        const result = await client.createEndpoint(entitySlug, projectId, createData);
-
-        expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/endpoints`,
-          expect.objectContaining({
-            method: 'POST',
-            body: JSON.stringify(createData),
-          })
-        );
-        expect(result).toEqual(mockEndpoint);
-      });
-    });
-
-    describe('deleteEndpoint', () => {
-      it('should delete an endpoint with DELETE request', async () => {
-        mockFetch.mockResolvedValueOnce({ ok: true });
-
-        await client.deleteEndpoint(entitySlug, projectId, endpointId);
-
-        expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/endpoints/${endpointId}`,
-          expect.objectContaining({ method: 'DELETE' })
-        );
-      });
-
-      it('should throw error when delete fails', async () => {
-        mockFetch.mockResolvedValueOnce({
-          ok: false,
-          statusText: 'Not Found',
-        });
-
-        await expect(client.deleteEndpoint(entitySlug, projectId, endpointId)).rejects.toThrow(
-          'Failed to delete endpoint: Not Found'
-        );
-      });
-    });
-  });
-
-  describe('Glossaries', () => {
-    const glossaryId = 'g1';
-
-    describe('getGlossaries', () => {
-      it('should fetch glossaries for a project', async () => {
-        const mockGlossaries = [{ id: 'g1', term: 'hello' }];
-        mockFetch.mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockGlossaries),
-        });
-
-        const result = await client.getGlossaries(entitySlug, projectId);
-
-        expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/glossaries`,
-          expect.objectContaining({ method: 'GET' })
-        );
-        expect(result).toEqual(mockGlossaries);
-      });
-    });
-
-    describe('createGlossary', () => {
-      it('should create a glossary entry', async () => {
-        const createData = { term: 'hello', translations: { es: 'hola' } };
-        const mockGlossary = { id: 'g1', ...createData };
-        mockFetch.mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockGlossary),
-        });
-
-        const result = await client.createGlossary(entitySlug, projectId, createData);
-
-        expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/glossaries`,
-          expect.objectContaining({
-            method: 'POST',
-            body: JSON.stringify(createData),
-          })
-        );
-        expect(result).toEqual(mockGlossary);
-      });
-    });
-
-    describe('deleteGlossary', () => {
-      it('should delete a glossary entry', async () => {
-        mockFetch.mockResolvedValueOnce({ ok: true });
-
-        await client.deleteGlossary(entitySlug, projectId, glossaryId);
-
-        expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/glossaries/${glossaryId}`,
-          expect.objectContaining({ method: 'DELETE' })
-        );
-      });
-
-      it('should throw error when delete fails', async () => {
-        mockFetch.mockResolvedValueOnce({
-          ok: false,
-          statusText: 'Not Found',
-        });
-
-        await expect(client.deleteGlossary(entitySlug, projectId, glossaryId)).rejects.toThrow(
-          'Failed to delete glossary: Not Found'
-        );
-      });
-    });
-
-    describe('importGlossaries', () => {
-      it('should import multiple glossaries', async () => {
-        const glossaries = [
-          { term: 'hello', translations: { es: 'hola' } },
-          { term: 'world', translations: { es: 'mundo' } },
-        ];
-        const mockResult = [
-          { id: 'g1', ...glossaries[0] },
-          { id: 'g2', ...glossaries[1] },
-        ];
+    describe('searchDictionary', () => {
+      it('should search dictionary by language code and text', async () => {
+        const mockResult = { dictionary_id: 'd1', translations: { en: 'hello', es: 'hola' } };
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: () => Promise.resolve(mockResult),
         });
 
-        const result = await client.importGlossaries(entitySlug, projectId, glossaries);
+        const result = await client.searchDictionary(entitySlug, projectId, 'en', 'hello');
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/glossaries/import`,
+          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/dictionary/search/en/hello`,
+          expect.objectContaining({ method: 'GET' })
+        );
+        expect(result).toEqual(mockResult);
+      });
+    });
+
+    describe('createDictionary', () => {
+      it('should create a dictionary entry', async () => {
+        const createData = { en: 'hello', es: 'hola' };
+        const mockResult = { dictionary_id: 'd1', translations: createData };
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve(mockResult),
+        });
+
+        const result = await client.createDictionary(entitySlug, projectId, createData);
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/dictionary`,
           expect.objectContaining({
             method: 'POST',
-            body: JSON.stringify({ glossaries }),
+            body: JSON.stringify(createData),
           })
         );
         expect(result).toEqual(mockResult);
       });
     });
 
-    describe('exportGlossaries', () => {
-      it('should export glossaries as JSON by default', async () => {
+    describe('updateDictionary', () => {
+      it('should update a dictionary entry', async () => {
+        const updateData = { de: 'hallo' };
+        const mockResult = { dictionary_id: 'd1', translations: { en: 'hello', es: 'hola', de: 'hallo' } };
         mockFetch.mockResolvedValueOnce({
           ok: true,
-          text: () => Promise.resolve('[{"term": "hello"}]'),
+          json: () => Promise.resolve(mockResult),
         });
 
-        const result = await client.exportGlossaries(entitySlug, projectId);
+        const result = await client.updateDictionary(entitySlug, projectId, dictionaryId, updateData);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/glossaries/export?format=json`,
-          expect.objectContaining({ method: 'GET' })
+          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/dictionary/${dictionaryId}`,
+          expect.objectContaining({
+            method: 'PUT',
+            body: JSON.stringify(updateData),
+          })
         );
-        expect(result).toBe('[{"term": "hello"}]');
+        expect(result).toEqual(mockResult);
       });
+    });
 
-      it('should export glossaries as CSV when specified', async () => {
+    describe('deleteDictionary', () => {
+      it('should delete a dictionary entry', async () => {
+        const mockResult = { dictionary_id: 'd1', translations: { en: 'hello', es: 'hola' } };
         mockFetch.mockResolvedValueOnce({
           ok: true,
-          text: () => Promise.resolve('term,translation\nhello,hola'),
+          json: () => Promise.resolve(mockResult),
         });
 
-        const result = await client.exportGlossaries(entitySlug, projectId, 'csv');
+        const result = await client.deleteDictionary(entitySlug, projectId, dictionaryId);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/glossaries/export?format=csv`,
-          expect.objectContaining({ method: 'GET' })
+          `${baseUrl}/entities/${entitySlug}/projects/${projectId}/dictionary/${dictionaryId}`,
+          expect.objectContaining({ method: 'DELETE' })
         );
-        expect(result).toBe('term,translation\nhello,hola');
+        expect(result).toEqual(mockResult);
       });
     });
   });
@@ -487,10 +375,10 @@ describe('WhisperlyClient', () => {
           json: () => Promise.resolve(mockResponse),
         });
 
-        const result = await client.translate('my-org', 'my-project', 'translate', request);
+        const result = await client.translate('my-org', 'my-project', request);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          `${baseUrl}/translate/my-org/my-project/translate`,
+          `${baseUrl}/translate/my-org/my-project`,
           expect.objectContaining({
             method: 'POST',
             body: JSON.stringify(request),

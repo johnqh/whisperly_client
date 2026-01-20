@@ -1,13 +1,5 @@
 import type { User } from 'firebase/auth';
 
-// Re-export Endpoint types from whisperly_types for convenience
-export type {
-  HttpMethod,
-  Endpoint,
-  EndpointCreateRequest,
-  EndpointUpdateRequest,
-} from '@sudobility/whisperly_types';
-
 export type FirebaseIdToken = () => Promise<string | undefined>;
 
 export interface WhisperlyClientConfig {
@@ -20,10 +12,8 @@ export type AuthHeaders = Record<string, string>;
 export const QUERY_KEYS = {
   projects: 'whisperly-projects',
   project: 'whisperly-project',
-  endpoints: 'whisperly-endpoints',
-  endpoint: 'whisperly-endpoint',
-  glossaries: 'whisperly-glossaries',
-  glossary: 'whisperly-glossary',
+  dictionary: 'whisperly-dictionary',
+  dictionarySearch: 'whisperly-dictionary-search',
   settings: 'whisperly-settings',
   analytics: 'whisperly-analytics',
   subscription: 'whisperly-subscription',

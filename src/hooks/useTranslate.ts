@@ -7,13 +7,11 @@ export function useTranslate(client: WhisperlyClient) {
     mutationFn: ({
       orgPath,
       projectName,
-      endpointName,
       request,
     }: {
       orgPath: string;
       projectName: string;
-      endpointName: string;
       request: TranslationRequest;
-    }) => client.translate(orgPath, projectName, endpointName, request),
+    }) => client.translate(orgPath, projectName, request),
   });
 }

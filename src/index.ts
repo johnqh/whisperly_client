@@ -5,10 +5,6 @@ export type {
   AuthHeaders,
   QueryKeys,
   UseFirebaseAuth,
-  HttpMethod,
-  Endpoint,
-  EndpointCreateRequest,
-  EndpointUpdateRequest,
 } from './types';
 export { QUERY_KEYS } from './types';
 
@@ -34,22 +30,11 @@ export {
 } from './hooks/useProjects';
 
 export {
-  useEndpoints,
-  useEndpoint,
-  useCreateEndpoint,
-  useUpdateEndpoint,
-  useDeleteEndpoint,
-} from './hooks/useEndpoints';
-
-export {
-  useGlossaries,
-  useGlossary,
-  useCreateGlossary,
-  useUpdateGlossary,
-  useDeleteGlossary,
-  useImportGlossaries,
-  useExportGlossaries,
-} from './hooks/useGlossaries';
+  useSearchDictionary,
+  useCreateDictionary,
+  useUpdateDictionary,
+  useDeleteDictionary,
+} from './hooks/useDictionary';
 
 export { useSettings, useUpdateSettings } from './hooks/useSettings';
 
@@ -63,15 +48,18 @@ export type {
   Project,
   ProjectCreateRequest,
   ProjectUpdateRequest,
-  Glossary,
-  GlossaryCreateRequest,
-  GlossaryUpdateRequest,
+  Dictionary,
+  DictionaryEntry,
+  DictionaryTranslations,
+  DictionaryCreateRequest,
+  DictionaryUpdateRequest,
+  DictionarySearchResponse,
+  DictionaryLookupResponse,
   UserSettings,
   UserSettingsUpdateRequest,
   AnalyticsResponse,
   TranslationRequest,
   TranslationResponse,
-  GlossaryLookupResponse,
   ApiResponse,
   PaginatedResponse,
 } from '@sudobility/whisperly_types';
