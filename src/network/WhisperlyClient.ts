@@ -5,6 +5,8 @@ import type {
   DictionaryCreateRequest,
   DictionaryUpdateRequest,
   DictionarySearchResponse,
+  ProjectLanguagesResponse,
+  AvailableLanguage,
   UserSettings,
   UserSettingsUpdateRequest,
   AnalyticsResponse,
@@ -173,6 +175,56 @@ export class WhisperlyClient {
       }
     );
     return handleApiResponse<DictionarySearchResponse>(response);
+  }
+
+  // =============================================================================
+  // Project Languages (Entity-centric: /entities/:entitySlug/projects/:projectId/languages)
+  // =============================================================================
+  async getProjectLanguages(
+    entitySlug: string,
+    projectId: string
+  ): Promise<ProjectLanguagesResponse> {
+    const headers = await createAuthHeaders(this.getIdToken);
+    const response = await fetch(
+      this.url(`/entities/${entitySlug}/projects/${projectId}/languages`),
+      {
+        method: 'GET',
+        headers,
+      }
+    );
+    return handleApiResponse<ProjectLanguagesResponse>(response);
+  }
+
+  async updateProjectLanguages(
+    entitySlug: string,
+    projectId: string,
+    languages: string
+  ): Promise<ProjectLanguagesResponse> {
+    const headers = await createAuthHeaders(this.getIdToken);
+    const response = await fetch(
+      this.url(`/entities/${entitySlug}/projects/${projectId}/languages`),
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ languages }),
+      }
+    );
+    return handleApiResponse<ProjectLanguagesResponse>(response);
+  }
+
+  // =============================================================================
+  // Available Languages (Config: /available-languages)
+  // =============================================================================
+  async getAvailableLanguages(): Promise<AvailableLanguage[]> {
+    const headers = await createAuthHeaders(this.getIdToken);
+    const response = await fetch(
+      this.url('/available-languages'),
+      {
+        method: 'GET',
+        headers,
+      }
+    );
+    return handleApiResponse<AvailableLanguage[]>(response);
   }
 
   // =============================================================================

@@ -55,6 +55,8 @@ export type {
   DictionaryUpdateRequest,
   DictionarySearchResponse,
   DictionaryLookupResponse,
+  ProjectLanguagesResponse,
+  AvailableLanguage,
   UserSettings,
   UserSettingsUpdateRequest,
   AnalyticsResponse,
