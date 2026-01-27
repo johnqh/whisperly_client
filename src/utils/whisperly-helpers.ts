@@ -45,7 +45,12 @@ export async function handleApiResponse<T>(response: Response): Promise<T> {
       details
     );
   }
-  return response.json() as Promise<T>;
+  const json = await response.json();
+  // API returns { success, data, timestamp } - extract the data field
+  if (json && typeof json === 'object' && 'data' in json) {
+    return json.data as T;
+  }
+  return json as T;
 }
 
 export function formatQueryParams(
