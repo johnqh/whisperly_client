@@ -3,6 +3,18 @@ import type { DictionaryCreateRequest, DictionaryUpdateRequest } from '@sudobili
 import { WhisperlyClient } from '../network/WhisperlyClient';
 import { QUERY_KEYS } from '../types';
 
+export function useDictionaries(
+  client: WhisperlyClient,
+  entitySlug: string,
+  projectId: string
+) {
+  return useQuery({
+    queryKey: [QUERY_KEYS.dictionary, entitySlug, projectId],
+    queryFn: () => client.getDictionaries(entitySlug, projectId),
+    enabled: !!entitySlug && !!projectId,
+  });
+}
+
 export function useSearchDictionary(
   client: WhisperlyClient,
   entitySlug: string,

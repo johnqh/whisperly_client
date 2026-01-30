@@ -109,6 +109,21 @@ export class WhisperlyClient {
   // =============================================================================
   // Dictionary (Entity-centric: /entities/:entitySlug/projects/:projectId/dictionary)
   // =============================================================================
+  async getDictionaries(
+    entitySlug: string,
+    projectId: string
+  ): Promise<DictionarySearchResponse[]> {
+    const headers = await createAuthHeaders(this.getIdToken);
+    const response = await fetch(
+      this.url(`/entities/${entitySlug}/projects/${projectId}/dictionary`),
+      {
+        method: 'GET',
+        headers,
+      }
+    );
+    return handleApiResponse<DictionarySearchResponse[]>(response);
+  }
+
   async searchDictionary(
     entitySlug: string,
     projectId: string,
