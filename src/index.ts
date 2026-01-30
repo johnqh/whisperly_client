@@ -30,6 +30,7 @@ export {
 } from './hooks/useProjects';
 
 export {
+  useDictionaries,
   useSearchDictionary,
   useCreateDictionary,
   useUpdateDictionary,
