@@ -14,6 +14,8 @@ export const QUERY_KEYS = {
   project: 'whisperly-project',
   dictionary: 'whisperly-dictionary',
   dictionarySearch: 'whisperly-dictionary-search',
+  projectLanguages: 'whisperly-project-languages',
+  availableLanguages: 'whisperly-available-languages',
   settings: 'whisperly-settings',
   analytics: 'whisperly-analytics',
   subscription: 'whisperly-subscription',

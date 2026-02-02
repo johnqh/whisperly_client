@@ -21,23 +21,13 @@ export {
 export { WhisperlyClient } from './network/WhisperlyClient';
 
 // Hooks
-export {
-  useProjects,
-  useProject,
-  useCreateProject,
-  useUpdateProject,
-  useDeleteProject,
-} from './hooks/useProjects';
+export { useProjects, useProject } from './hooks/useProjects';
 
-export {
-  useDictionaries,
-  useSearchDictionary,
-  useCreateDictionary,
-  useUpdateDictionary,
-  useDeleteDictionary,
-} from './hooks/useDictionary';
+export { useDictionaries, useSearchDictionary } from './hooks/useDictionary';
 
-export { useSettings, useUpdateSettings } from './hooks/useSettings';
+export { useSettings } from './hooks/useSettings';
+
+export { useProjectLanguages, useAvailableLanguages } from './hooks/useLanguages';
 
 export { useAnalytics } from './hooks/useAnalytics';
 export type { UseAnalyticsOptions } from './hooks/useAnalytics';

@@ -16,9 +16,14 @@ export function useAnalytics(
 ) {
   const { startDate, endDate, projectId, enabled = true } = options;
 
-  return useQuery({
+  const query = useQuery({
     queryKey: [QUERY_KEYS.analytics, entitySlug, startDate, endDate, projectId],
     queryFn: () => client.getAnalytics(entitySlug, startDate, endDate, projectId),
     enabled: enabled && !!entitySlug,
   });
+
+  return {
+    ...query,
+    update: () => query.refetch(),
+  };
 }
