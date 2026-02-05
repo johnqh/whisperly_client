@@ -58,3 +58,15 @@ export function useProject(client: WhisperlyClient, entitySlug: string, projectI
     update: () => query.refetch(),
   };
 }
+
+export function useGenerateApiKey(client: WhisperlyClient, entitySlug: string, projectId: string) {
+  return useMutation({
+    mutationFn: () => client.generateProjectApiKey(entitySlug, projectId),
+  });
+}
+
+export function useDeleteApiKey(client: WhisperlyClient, entitySlug: string, projectId: string) {
+  return useMutation({
+    mutationFn: () => client.deleteProjectApiKey(entitySlug, projectId),
+  });
+}

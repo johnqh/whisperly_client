@@ -106,6 +106,30 @@ export class WhisperlyClient {
     }
   }
 
+  async generateProjectApiKey(entitySlug: string, projectId: string): Promise<Project> {
+    const headers = await createAuthHeaders(this.getIdToken);
+    const response = await fetch(
+      this.url(`/entities/${entitySlug}/projects/${projectId}/api-key`),
+      {
+        method: 'POST',
+        headers,
+      }
+    );
+    return handleApiResponse<Project>(response);
+  }
+
+  async deleteProjectApiKey(entitySlug: string, projectId: string): Promise<Project> {
+    const headers = await createAuthHeaders(this.getIdToken);
+    const response = await fetch(
+      this.url(`/entities/${entitySlug}/projects/${projectId}/api-key`),
+      {
+        method: 'DELETE',
+        headers,
+      }
+    );
+    return handleApiResponse<Project>(response);
+  }
+
   // =============================================================================
   // Dictionary (Entity-centric: /entities/:entitySlug/projects/:projectId/dictionary)
   // =============================================================================
@@ -336,10 +360,14 @@ export class WhisperlyClient {
     orgPath: string,
     projectName: string,
     request: TranslationRequest,
-    testMode: boolean = false
+    testMode: boolean = false,
+    apiKey?: string
   ): Promise<TranslationResponse> {
     // Translation endpoint is public, no auth needed
-    const params = testMode ? formatQueryParams({ testMode: 'true' }) : '';
+    const params = formatQueryParams({
+      testMode: testMode ? 'true' : undefined,
+      api_key: apiKey,
+    });
     const response = await fetch(
       this.url(`/translate/${orgPath}/${projectName}${params}`),
       {

@@ -21,7 +21,7 @@ export {
 export { WhisperlyClient } from './network/WhisperlyClient';
 
 // Hooks
-export { useProjects, useProject } from './hooks/useProjects';
+export { useProjects, useProject, useGenerateApiKey, useDeleteApiKey } from './hooks/useProjects';
 
 export { useDictionaries, useSearchDictionary } from './hooks/useDictionary';
 

@@ -8,10 +8,12 @@ export function useTranslate(client: WhisperlyClient, testMode: boolean = false)
       orgPath,
       projectName,
       request,
+      apiKey,
     }: {
       orgPath: string;
       projectName: string;
       request: TranslationRequest;
-    }) => client.translate(orgPath, projectName, request, testMode),
+      apiKey?: string;
+    }) => client.translate(orgPath, projectName, request, testMode, apiKey),
   });
 }
