@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import type { TranslationRequest } from '@sudobility/whisperly_types';
 import { WhisperlyClient } from '../network/WhisperlyClient';
 
-export function useTranslate(client: WhisperlyClient) {
+export function useTranslate(client: WhisperlyClient, testMode: boolean = false) {
   return useMutation({
     mutationFn: ({
       orgPath,
@@ -12,6 +12,6 @@ export function useTranslate(client: WhisperlyClient) {
       orgPath: string;
       projectName: string;
       request: TranslationRequest;
-    }) => client.translate(orgPath, projectName, request),
+    }) => client.translate(orgPath, projectName, request, testMode),
   });
 }

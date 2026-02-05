@@ -335,11 +335,13 @@ export class WhisperlyClient {
   async translate(
     orgPath: string,
     projectName: string,
-    request: TranslationRequest
+    request: TranslationRequest,
+    testMode: boolean = false
   ): Promise<TranslationResponse> {
     // Translation endpoint is public, no auth needed
+    const params = testMode ? formatQueryParams({ testMode: 'true' }) : '';
     const response = await fetch(
-      this.url(`/translate/${orgPath}/${projectName}`),
+      this.url(`/translate/${orgPath}/${projectName}${params}`),
       {
         method: 'POST',
         headers: {
