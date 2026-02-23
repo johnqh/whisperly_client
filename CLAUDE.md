@@ -41,6 +41,7 @@ bun run build:watch  # Build in watch mode
 bun run typecheck    # TypeScript type checking
 bun run lint         # ESLint
 bun run test:run     # Run tests once
+bun run verify       # typecheck + lint + test + build (use before committing)
 ```
 
 ## WhisperlyClient API Methods

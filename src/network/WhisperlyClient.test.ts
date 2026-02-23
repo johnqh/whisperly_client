@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { MockNetworkClient } from '@sudobility/di/mocks';
 import { WhisperlyClient } from './WhisperlyClient';
+import { WhisperlyApiError } from '../utils/whisperly-helpers';
 
 describe('WhisperlyClient', () => {
   let client: WhisperlyClient;
@@ -135,22 +136,56 @@ describe('WhisperlyClient', () => {
         ).toBe(true);
       });
 
-      it('should throw error when delete fails', async () => {
+      it('should throw WhisperlyApiError when delete fails', async () => {
+        const errorData = { error: 'Project not found' };
         mockNetwork.setMockResponse(
           `${baseUrl}${apiPrefix}/entities/${entitySlug}/projects/${projectId}`,
-          { ok: false, status: 404, statusText: 'Not Found' },
+          { ok: false, status: 404, statusText: 'Not Found', data: errorData },
           'DELETE'
         );
 
         await expect(
           client.deleteProject(entitySlug, projectId)
         ).rejects.toThrow('Failed to delete project: Not Found');
+
+        try {
+          await client.deleteProject(entitySlug, projectId);
+          expect.fail('should have thrown');
+        } catch (e) {
+          expect(e).toBeInstanceOf(WhisperlyApiError);
+          const err = e as WhisperlyApiError;
+          expect(err.statusCode).toBe(404);
+          expect(err.details).toEqual(errorData);
+        }
       });
     });
   });
 
   describe('Dictionary', () => {
     const dictionaryId = 'd1';
+
+    describe('getDictionaries', () => {
+      it('should fetch all dictionaries for a project', async () => {
+        const mockDictionaries = [
+          { dictionary_id: 'd1', translations: { en: 'hello', es: 'hola' } },
+          { dictionary_id: 'd2', translations: { en: 'world', es: 'mundo' } },
+        ];
+        mockGet(
+          `/entities/${entitySlug}/projects/${projectId}/dictionary`,
+          mockDictionaries
+        );
+
+        const result = await client.getDictionaries(entitySlug, projectId);
+
+        expect(result).toEqual(mockDictionaries);
+        expect(
+          mockNetwork.wasUrlCalled(
+            `${baseUrl}${apiPrefix}/entities/${entitySlug}/projects/${projectId}/dictionary`,
+            'GET'
+          )
+        ).toBe(true);
+      });
+    });
 
     describe('searchDictionary', () => {
       it('should search dictionary by language code and text', async () => {
@@ -266,6 +301,58 @@ describe('WhisperlyClient', () => {
     });
   });
 
+  describe('Project Languages', () => {
+    describe('getProjectLanguages', () => {
+      it('should fetch project languages', async () => {
+        const mockLanguages = { project_id: projectId, languages: 'en,es,fr' };
+        mockGet(
+          `/entities/${entitySlug}/projects/${projectId}/languages`,
+          mockLanguages
+        );
+
+        const result = await client.getProjectLanguages(entitySlug, projectId);
+
+        expect(result).toEqual(mockLanguages);
+      });
+    });
+
+    describe('updateProjectLanguages', () => {
+      it('should update project languages', async () => {
+        const mockLanguages = { project_id: projectId, languages: 'en,es,fr,de' };
+        mockPost(
+          `/entities/${entitySlug}/projects/${projectId}/languages`,
+          mockLanguages
+        );
+
+        const result = await client.updateProjectLanguages(
+          entitySlug,
+          projectId,
+          'en,es,fr,de'
+        );
+
+        expect(result).toEqual(mockLanguages);
+        const lastRequest = mockNetwork.getLastRequest();
+        expect(lastRequest?.method).toBe('POST');
+      });
+    });
+  });
+
+  describe('Available Languages', () => {
+    describe('getAvailableLanguages', () => {
+      it('should fetch all available languages', async () => {
+        const mockLanguages = [
+          { language_code: 'en', language: 'English', flag: 'us' },
+          { language_code: 'es', language: 'Spanish', flag: 'es' },
+        ];
+        mockGet('/available-languages', mockLanguages);
+
+        const result = await client.getAvailableLanguages();
+
+        expect(result).toEqual(mockLanguages);
+      });
+    });
+  });
+
   describe('Analytics', () => {
     describe('getAnalytics', () => {
       it('should fetch analytics without filters', async () => {
@@ -297,10 +384,55 @@ describe('WhisperlyClient', () => {
     });
   });
 
+  describe('API Keys', () => {
+    describe('generateProjectApiKey', () => {
+      it('should generate an API key for a project', async () => {
+        const mockProject = { id: projectId, api_key: 'new-key-123' };
+        mockPost(
+          `/entities/${entitySlug}/projects/${projectId}/api-key`,
+          mockProject
+        );
+
+        const result = await client.generateProjectApiKey(entitySlug, projectId);
+
+        expect(result).toEqual(mockProject);
+        const lastRequest = mockNetwork.getLastRequest();
+        expect(lastRequest?.method).toBe('POST');
+      });
+    });
+
+    describe('deleteProjectApiKey', () => {
+      it('should delete the API key for a project', async () => {
+        const mockProject = { id: projectId, api_key: null };
+        mockNetwork.setMockResponse(
+          `${baseUrl}${apiPrefix}/entities/${entitySlug}/projects/${projectId}/api-key`,
+          { data: { data: mockProject }, ok: true },
+          'DELETE'
+        );
+
+        const result = await client.deleteProjectApiKey(entitySlug, projectId);
+
+        expect(result).toEqual(mockProject);
+      });
+    });
+  });
+
   describe('Rate Limits', () => {
     describe('getRateLimits', () => {
       it('should fetch rate limits for entity', async () => {
-        const mockLimits = { hourly: { remaining: 100 } };
+        const mockLimits = {
+          tier: 'free',
+          monthly_limit: 1000,
+          monthly_used: 50,
+          monthly_remaining: 950,
+          hourly_limit: 100,
+          hourly_used: 5,
+          hourly_remaining: 95,
+          resets_at: {
+            monthly: '2024-02-01T00:00:00Z',
+            hourly: '2024-01-15T15:00:00Z',
+          },
+        };
         mockGet(`/ratelimits/${entitySlug}`, mockLimits);
 
         const result = await client.getRateLimits(entitySlug);
@@ -320,6 +452,37 @@ describe('WhisperlyClient', () => {
         expect(
           mockNetwork.wasUrlCalled(
             `${baseUrl}${apiPrefix}/ratelimits/${entitySlug}?testMode=true`,
+            'GET'
+          )
+        ).toBe(true);
+      });
+    });
+
+    describe('getRateLimitHistory', () => {
+      it('should fetch rate limit history for a period type', async () => {
+        const mockHistory = [
+          { tier: 'free', monthly_limit: 1000, monthly_used: 10, monthly_remaining: 990, hourly_limit: 100, hourly_used: 1, hourly_remaining: 99, resets_at: { monthly: '2024-02-01T00:00:00Z', hourly: '2024-01-15T14:00:00Z' } },
+          { tier: 'free', monthly_limit: 1000, monthly_used: 20, monthly_remaining: 980, hourly_limit: 100, hourly_used: 2, hourly_remaining: 98, resets_at: { monthly: '2024-02-01T00:00:00Z', hourly: '2024-01-15T15:00:00Z' } },
+        ];
+        mockGet(`/ratelimits/${entitySlug}/history/hour`, mockHistory);
+
+        const result = await client.getRateLimitHistory(entitySlug, 'hour');
+
+        expect(result).toEqual(mockHistory);
+      });
+
+      it('should include testMode parameter when specified', async () => {
+        mockNetwork.setMockResponse(
+          `${baseUrl}${apiPrefix}/ratelimits/${entitySlug}/history/day?testMode=true`,
+          { data: { data: [] }, ok: true },
+          'GET'
+        );
+
+        await client.getRateLimitHistory(entitySlug, 'day', true);
+
+        expect(
+          mockNetwork.wasUrlCalled(
+            `${baseUrl}${apiPrefix}/ratelimits/${entitySlug}/history/day?testMode=true`,
             'GET'
           )
         ).toBe(true);

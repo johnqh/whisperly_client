@@ -37,6 +37,7 @@ export { useTranslate } from './hooks/useTranslate';
 
 // Re-export types from whisperly_types for convenience
 export type {
+  // Entity types
   Project,
   ProjectCreateRequest,
   ProjectUpdateRequest,
@@ -54,6 +55,16 @@ export type {
   AnalyticsResponse,
   TranslationRequest,
   TranslationResponse,
+  RateLimitStatus,
+  RateLimitTier,
+  // Response wrappers
   ApiResponse,
   PaginatedResponse,
+  // Usage/analytics types
+  UsageAggregate,
+  UsageByProject,
+  UsageByDate,
+  User,
+  UserCreateRequest,
+  UsageRecord,
 } from '@sudobility/whisperly_types';
