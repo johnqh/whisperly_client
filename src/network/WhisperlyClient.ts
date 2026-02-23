@@ -13,22 +13,22 @@ import type {
   TranslationRequest,
   TranslationResponse,
 } from '@sudobility/whisperly_types';
+import type { NetworkClient } from '@sudobility/types';
 import type { WhisperlyClientConfig } from '../types';
 import {
-  createAuthHeaders,
   buildUrl,
-  handleApiResponse,
+  handleNetworkResponse,
   formatQueryParams,
 } from '../utils/whisperly-helpers';
 
 export class WhisperlyClient {
-  private baseUrl: string;
-  private getIdToken: () => Promise<string | undefined>;
+  private readonly baseUrl: string;
+  private readonly networkClient: NetworkClient;
   private apiPrefix = '/api/v1';
 
   constructor(config: WhisperlyClientConfig) {
     this.baseUrl = config.baseUrl;
-    this.getIdToken = config.getIdToken;
+    this.networkClient = config.networkClient;
   }
 
   private url(path: string): string {
@@ -39,40 +39,28 @@ export class WhisperlyClient {
   // Projects (Entity-centric: /entities/:entitySlug/projects)
   // =============================================================================
   async getProjects(entitySlug: string): Promise<Project[]> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      this.url(`/entities/${entitySlug}/projects`),
-      {
-        method: 'GET',
-        headers,
-      }
+    const response = await this.networkClient.get(
+      this.url(`/entities/${entitySlug}/projects`)
     );
-    return handleApiResponse<Project[]>(response);
+    return handleNetworkResponse<Project[]>(response);
   }
 
   async getProject(entitySlug: string, projectId: string): Promise<Project> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      this.url(`/entities/${entitySlug}/projects/${projectId}`),
-      {
-        method: 'GET',
-        headers,
-      }
+    const response = await this.networkClient.get(
+      this.url(`/entities/${entitySlug}/projects/${projectId}`)
     );
-    return handleApiResponse<Project>(response);
+    return handleNetworkResponse<Project>(response);
   }
 
-  async createProject(entitySlug: string, data: ProjectCreateRequest): Promise<Project> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
+  async createProject(
+    entitySlug: string,
+    data: ProjectCreateRequest
+  ): Promise<Project> {
+    const response = await this.networkClient.post(
       this.url(`/entities/${entitySlug}/projects`),
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(data),
-      }
+      data
     );
-    return handleApiResponse<Project>(response);
+    return handleNetworkResponse<Project>(response);
   }
 
   async updateProject(
@@ -80,54 +68,42 @@ export class WhisperlyClient {
     projectId: string,
     data: ProjectUpdateRequest
   ): Promise<Project> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
+    const response = await this.networkClient.put(
       this.url(`/entities/${entitySlug}/projects/${projectId}`),
-      {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(data),
-      }
+      data
     );
-    return handleApiResponse<Project>(response);
+    return handleNetworkResponse<Project>(response);
   }
 
   async deleteProject(entitySlug: string, projectId: string): Promise<void> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      this.url(`/entities/${entitySlug}/projects/${projectId}`),
-      {
-        method: 'DELETE',
-        headers,
-      }
+    const response = await this.networkClient.delete(
+      this.url(`/entities/${entitySlug}/projects/${projectId}`)
     );
     if (!response.ok) {
-      throw new Error(`Failed to delete project: ${response.statusText}`);
+      throw new Error(
+        `Failed to delete project: ${response.statusText}`
+      );
     }
   }
 
-  async generateProjectApiKey(entitySlug: string, projectId: string): Promise<Project> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      this.url(`/entities/${entitySlug}/projects/${projectId}/api-key`),
-      {
-        method: 'POST',
-        headers,
-      }
+  async generateProjectApiKey(
+    entitySlug: string,
+    projectId: string
+  ): Promise<Project> {
+    const response = await this.networkClient.post(
+      this.url(`/entities/${entitySlug}/projects/${projectId}/api-key`)
     );
-    return handleApiResponse<Project>(response);
+    return handleNetworkResponse<Project>(response);
   }
 
-  async deleteProjectApiKey(entitySlug: string, projectId: string): Promise<Project> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      this.url(`/entities/${entitySlug}/projects/${projectId}/api-key`),
-      {
-        method: 'DELETE',
-        headers,
-      }
+  async deleteProjectApiKey(
+    entitySlug: string,
+    projectId: string
+  ): Promise<Project> {
+    const response = await this.networkClient.delete(
+      this.url(`/entities/${entitySlug}/projects/${projectId}/api-key`)
     );
-    return handleApiResponse<Project>(response);
+    return handleNetworkResponse<Project>(response);
   }
 
   // =============================================================================
@@ -137,15 +113,12 @@ export class WhisperlyClient {
     entitySlug: string,
     projectId: string
   ): Promise<DictionarySearchResponse[]> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      this.url(`/entities/${entitySlug}/projects/${projectId}/dictionary`),
-      {
-        method: 'GET',
-        headers,
-      }
+    const response = await this.networkClient.get(
+      this.url(
+        `/entities/${entitySlug}/projects/${projectId}/dictionary`
+      )
     );
-    return handleApiResponse<DictionarySearchResponse[]>(response);
+    return handleNetworkResponse<DictionarySearchResponse[]>(response);
   }
 
   async searchDictionary(
@@ -154,15 +127,12 @@ export class WhisperlyClient {
     languageCode: string,
     text: string
   ): Promise<DictionarySearchResponse> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      this.url(`/entities/${entitySlug}/projects/${projectId}/dictionary/search/${encodeURIComponent(languageCode)}/${encodeURIComponent(text)}`),
-      {
-        method: 'GET',
-        headers,
-      }
+    const response = await this.networkClient.get(
+      this.url(
+        `/entities/${entitySlug}/projects/${projectId}/dictionary/search/${encodeURIComponent(languageCode)}/${encodeURIComponent(text)}`
+      )
     );
-    return handleApiResponse<DictionarySearchResponse>(response);
+    return handleNetworkResponse<DictionarySearchResponse>(response);
   }
 
   async createDictionary(
@@ -170,16 +140,13 @@ export class WhisperlyClient {
     projectId: string,
     data: DictionaryCreateRequest
   ): Promise<DictionarySearchResponse> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      this.url(`/entities/${entitySlug}/projects/${projectId}/dictionary`),
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(data),
-      }
+    const response = await this.networkClient.post(
+      this.url(
+        `/entities/${entitySlug}/projects/${projectId}/dictionary`
+      ),
+      data
     );
-    return handleApiResponse<DictionarySearchResponse>(response);
+    return handleNetworkResponse<DictionarySearchResponse>(response);
   }
 
   async updateDictionary(
@@ -188,16 +155,13 @@ export class WhisperlyClient {
     dictionaryId: string,
     data: DictionaryUpdateRequest
   ): Promise<DictionarySearchResponse> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      this.url(`/entities/${entitySlug}/projects/${projectId}/dictionary/${dictionaryId}`),
-      {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(data),
-      }
+    const response = await this.networkClient.put(
+      this.url(
+        `/entities/${entitySlug}/projects/${projectId}/dictionary/${dictionaryId}`
+      ),
+      data
     );
-    return handleApiResponse<DictionarySearchResponse>(response);
+    return handleNetworkResponse<DictionarySearchResponse>(response);
   }
 
   async deleteDictionary(
@@ -205,15 +169,12 @@ export class WhisperlyClient {
     projectId: string,
     dictionaryId: string
   ): Promise<DictionarySearchResponse> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      this.url(`/entities/${entitySlug}/projects/${projectId}/dictionary/${dictionaryId}`),
-      {
-        method: 'DELETE',
-        headers,
-      }
+    const response = await this.networkClient.delete(
+      this.url(
+        `/entities/${entitySlug}/projects/${projectId}/dictionary/${dictionaryId}`
+      )
     );
-    return handleApiResponse<DictionarySearchResponse>(response);
+    return handleNetworkResponse<DictionarySearchResponse>(response);
   }
 
   // =============================================================================
@@ -223,15 +184,12 @@ export class WhisperlyClient {
     entitySlug: string,
     projectId: string
   ): Promise<ProjectLanguagesResponse> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      this.url(`/entities/${entitySlug}/projects/${projectId}/languages`),
-      {
-        method: 'GET',
-        headers,
-      }
+    const response = await this.networkClient.get(
+      this.url(
+        `/entities/${entitySlug}/projects/${projectId}/languages`
+      )
     );
-    return handleApiResponse<ProjectLanguagesResponse>(response);
+    return handleNetworkResponse<ProjectLanguagesResponse>(response);
   }
 
   async updateProjectLanguages(
@@ -239,59 +197,44 @@ export class WhisperlyClient {
     projectId: string,
     languages: string
   ): Promise<ProjectLanguagesResponse> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      this.url(`/entities/${entitySlug}/projects/${projectId}/languages`),
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ languages }),
-      }
+    const response = await this.networkClient.post(
+      this.url(
+        `/entities/${entitySlug}/projects/${projectId}/languages`
+      ),
+      { languages }
     );
-    return handleApiResponse<ProjectLanguagesResponse>(response);
+    return handleNetworkResponse<ProjectLanguagesResponse>(response);
   }
 
   // =============================================================================
   // Available Languages (Config: /available-languages)
   // =============================================================================
   async getAvailableLanguages(): Promise<AvailableLanguage[]> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      this.url('/available-languages'),
-      {
-        method: 'GET',
-        headers,
-      }
+    const response = await this.networkClient.get(
+      this.url('/available-languages')
     );
-    return handleApiResponse<AvailableLanguage[]>(response);
+    return handleNetworkResponse<AvailableLanguage[]>(response);
   }
 
   // =============================================================================
   // Settings (User-specific: /users/:userId/settings)
   // =============================================================================
   async getSettings(userId: string): Promise<UserSettings> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
-      this.url(`/users/${userId}/settings`),
-      {
-        method: 'GET',
-        headers,
-      }
+    const response = await this.networkClient.get(
+      this.url(`/users/${userId}/settings`)
     );
-    return handleApiResponse<UserSettings>(response);
+    return handleNetworkResponse<UserSettings>(response);
   }
 
-  async updateSettings(userId: string, data: UserSettingsUpdateRequest): Promise<UserSettings> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const response = await fetch(
+  async updateSettings(
+    userId: string,
+    data: UserSettingsUpdateRequest
+  ): Promise<UserSettings> {
+    const response = await this.networkClient.put(
       this.url(`/users/${userId}/settings`),
-      {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(data),
-      }
+      data
     );
-    return handleApiResponse<UserSettings>(response);
+    return handleNetworkResponse<UserSettings>(response);
   }
 
   // =============================================================================
@@ -303,36 +246,31 @@ export class WhisperlyClient {
     endDate?: string,
     projectId?: string
   ): Promise<AnalyticsResponse> {
-    const headers = await createAuthHeaders(this.getIdToken);
     const params = formatQueryParams({
       start_date: startDate,
       end_date: endDate,
       project_id: projectId,
     });
-    const response = await fetch(
-      this.url(`/entities/${entitySlug}/analytics${params}`),
-      {
-        method: 'GET',
-        headers,
-      }
+    const response = await this.networkClient.get(
+      this.url(`/entities/${entitySlug}/analytics${params}`)
     );
-    return handleApiResponse<AnalyticsResponse>(response);
+    return handleNetworkResponse<AnalyticsResponse>(response);
   }
 
   // =============================================================================
   // Rate Limits (Entity-centric: /ratelimits/:entitySlug)
   // =============================================================================
-  async getRateLimits(entitySlug: string, testMode: boolean = false): Promise<unknown> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const params = testMode ? formatQueryParams({ testMode: 'true' }) : '';
-    const response = await fetch(
-      this.url(`/ratelimits/${entitySlug}${params}`),
-      {
-        method: 'GET',
-        headers,
-      }
+  async getRateLimits(
+    entitySlug: string,
+    testMode: boolean = false
+  ): Promise<unknown> {
+    const params = testMode
+      ? formatQueryParams({ testMode: 'true' })
+      : '';
+    const response = await this.networkClient.get(
+      this.url(`/ratelimits/${entitySlug}${params}`)
     );
-    return handleApiResponse<unknown>(response);
+    return handleNetworkResponse<unknown>(response);
   }
 
   async getRateLimitHistory(
@@ -340,21 +278,19 @@ export class WhisperlyClient {
     periodType: 'hour' | 'day' | 'month',
     testMode: boolean = false
   ): Promise<unknown> {
-    const headers = await createAuthHeaders(this.getIdToken);
-    const params = testMode ? formatQueryParams({ testMode: 'true' }) : '';
-    const response = await fetch(
-      this.url(`/ratelimits/${entitySlug}/history/${periodType}${params}`),
-      {
-        method: 'GET',
-        headers,
-      }
+    const params = testMode
+      ? formatQueryParams({ testMode: 'true' })
+      : '';
+    const response = await this.networkClient.get(
+      this.url(
+        `/ratelimits/${entitySlug}/history/${periodType}${params}`
+      )
     );
-    return handleApiResponse<unknown>(response);
+    return handleNetworkResponse<unknown>(response);
   }
 
   // =============================================================================
   // Translation (Public: /translate/:orgPath/:projectName)
-  // Note: This endpoint is typically called without auth for consumer use
   // =============================================================================
   async translate(
     orgPath: string,
@@ -363,21 +299,14 @@ export class WhisperlyClient {
     testMode: boolean = false,
     apiKey?: string
   ): Promise<TranslationResponse> {
-    // Translation endpoint is public, no auth needed
     const params = formatQueryParams({
       testMode: testMode ? 'true' : undefined,
       api_key: apiKey,
     });
-    const response = await fetch(
+    const response = await this.networkClient.post(
       this.url(`/translate/${orgPath}/${projectName}${params}`),
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request),
-      }
+      request
     );
-    return handleApiResponse<TranslationResponse>(response);
+    return handleNetworkResponse<TranslationResponse>(response);
   }
 }

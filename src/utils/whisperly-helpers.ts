@@ -1,17 +1,4 @@
-import type { AuthHeaders, FirebaseIdToken } from '../types';
-
-export async function createAuthHeaders(
-  getIdToken: FirebaseIdToken
-): Promise<AuthHeaders> {
-  const token = await getIdToken();
-  if (!token) {
-    throw new Error('No authentication token available');
-  }
-  return {
-    Authorization: `Bearer ${token}`,
-    'Content-Type': 'application/json',
-  };
-}
+import type { NetworkResponse } from '@sudobility/types';
 
 export function buildUrl(baseUrl: string, path: string): string {
   const cleanBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
@@ -30,22 +17,17 @@ export class WhisperlyApiError extends Error {
   }
 }
 
-export async function handleApiResponse<T>(response: Response): Promise<T> {
+export function handleNetworkResponse<T>(
+  response: NetworkResponse
+): T {
   if (!response.ok) {
-    const text = await response.text();
-    let details: unknown;
-    try {
-      details = JSON.parse(text);
-    } catch {
-      details = text;
-    }
     throw new WhisperlyApiError(
       `API request failed: ${response.statusText}`,
       response.status,
-      details
+      response.data
     );
   }
-  const json = await response.json();
+  const json = response.data as Record<string, unknown> | null;
   // API returns { success, data, timestamp } - extract the data field
   if (json && typeof json === 'object' && 'data' in json) {
     return json.data as T;

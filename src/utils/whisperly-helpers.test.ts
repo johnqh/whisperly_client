@@ -1,34 +1,13 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
-  createAuthHeaders,
   buildUrl,
   WhisperlyApiError,
-  handleApiResponse,
+  handleNetworkResponse,
   formatQueryParams,
 } from './whisperly-helpers';
+import type { NetworkResponse } from '@sudobility/types';
 
 describe('whisperly-helpers', () => {
-  describe('createAuthHeaders', () => {
-    it('should create headers with valid token', async () => {
-      const getIdToken = vi.fn().mockResolvedValue('test-token');
-      const headers = await createAuthHeaders(getIdToken);
-
-      expect(headers).toEqual({
-        Authorization: 'Bearer test-token',
-        'Content-Type': 'application/json',
-      });
-      expect(getIdToken).toHaveBeenCalledOnce();
-    });
-
-    it('should throw error when no token available', async () => {
-      const getIdToken = vi.fn().mockResolvedValue(undefined);
-
-      await expect(createAuthHeaders(getIdToken)).rejects.toThrow(
-        'No authentication token available'
-      );
-    });
-  });
-
   describe('buildUrl', () => {
     it('should combine base URL and path correctly', () => {
       expect(buildUrl('https://api.example.com', '/users')).toBe(
@@ -75,45 +54,70 @@ describe('whisperly-helpers', () => {
     });
   });
 
-  describe('handleApiResponse', () => {
-    it('should return JSON for successful response', async () => {
-      const data = { id: 1, name: 'Test' };
-      const response = new Response(JSON.stringify(data), {
+  describe('handleNetworkResponse', () => {
+    it('should extract data field from successful response', () => {
+      const response: NetworkResponse = {
+        ok: true,
         status: 200,
         statusText: 'OK',
-      });
+        headers: {},
+        success: true,
+        data: { data: { id: 1, name: 'Test' } },
+      };
 
-      const result = await handleApiResponse(response);
-      expect(result).toEqual(data);
+      const result = handleNetworkResponse<{ id: number; name: string }>(response);
+      expect(result).toEqual({ id: 1, name: 'Test' });
     });
 
-    it('should throw WhisperlyApiError for failed response with JSON details', async () => {
-      const errorDetails = { error: 'Not found' };
-      const response = new Response(JSON.stringify(errorDetails), {
+    it('should return raw data when no data field', () => {
+      const response: NetworkResponse = {
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        success: true,
+        data: { id: 1, name: 'Test' },
+      };
+
+      const result = handleNetworkResponse<{ id: number; name: string }>(response);
+      expect(result).toEqual({ id: 1, name: 'Test' });
+    });
+
+    it('should throw WhisperlyApiError for failed response', () => {
+      const response: NetworkResponse = {
+        ok: false,
         status: 404,
         statusText: 'Not Found',
-      });
+        headers: {},
+        success: false,
+        data: { error: 'Not found' },
+      };
 
-      await expect(handleApiResponse(response)).rejects.toMatchObject({
-        name: 'WhisperlyApiError',
-        message: 'API request failed: Not Found',
-        statusCode: 404,
-        details: errorDetails,
-      });
+      expect(() => handleNetworkResponse(response)).toThrow(WhisperlyApiError);
+      expect(() => handleNetworkResponse(response)).toThrow(
+        'API request failed: Not Found'
+      );
     });
 
-    it('should throw WhisperlyApiError for failed response with text details', async () => {
-      const response = new Response('Internal Server Error', {
-        status: 500,
-        statusText: 'Internal Server Error',
-      });
+    it('should include details in error', () => {
+      const errorData = { error: 'Validation failed' };
+      const response: NetworkResponse = {
+        ok: false,
+        status: 400,
+        statusText: 'Bad Request',
+        headers: {},
+        success: false,
+        data: errorData,
+      };
 
-      await expect(handleApiResponse(response)).rejects.toMatchObject({
-        name: 'WhisperlyApiError',
-        message: 'API request failed: Internal Server Error',
-        statusCode: 500,
-        details: 'Internal Server Error',
-      });
+      try {
+        handleNetworkResponse(response);
+        expect.fail('should have thrown');
+      } catch (e) {
+        const err = e as WhisperlyApiError;
+        expect(err.statusCode).toBe(400);
+        expect(err.details).toEqual(errorData);
+      }
     });
   });
 
@@ -141,7 +145,10 @@ describe('whisperly-helpers', () => {
     });
 
     it('should handle string values', () => {
-      const result = formatQueryParams({ search: 'test query', status: 'active' });
+      const result = formatQueryParams({
+        search: 'test query',
+        status: 'active',
+      });
       expect(result).toBe('?search=test+query&status=active');
     });
   });

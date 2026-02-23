@@ -1,13 +1,9 @@
-import type { User } from 'firebase/auth';
-
-export type FirebaseIdToken = () => Promise<string | undefined>;
+import type { NetworkClient } from '@sudobility/types';
 
 export interface WhisperlyClientConfig {
   baseUrl: string;
-  getIdToken: FirebaseIdToken;
+  networkClient: NetworkClient;
 }
-
-export type AuthHeaders = Record<string, string>;
 
 export const QUERY_KEYS = {
   projects: 'whisperly-projects',
@@ -24,9 +20,3 @@ export const QUERY_KEYS = {
 } as const;
 
 export type QueryKeys = typeof QUERY_KEYS;
-
-export interface UseFirebaseAuth {
-  user: User | null;
-  loading: boolean;
-  getIdToken: FirebaseIdToken;
-}

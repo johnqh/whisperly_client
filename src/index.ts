@@ -1,18 +1,11 @@
 // Types
-export type {
-  FirebaseIdToken,
-  WhisperlyClientConfig,
-  AuthHeaders,
-  QueryKeys,
-  UseFirebaseAuth,
-} from './types';
+export type { WhisperlyClientConfig, QueryKeys } from './types';
 export { QUERY_KEYS } from './types';
 
 // Utils
 export {
-  createAuthHeaders,
   buildUrl,
-  handleApiResponse,
+  handleNetworkResponse,
   formatQueryParams,
   WhisperlyApiError,
 } from './utils/whisperly-helpers';
@@ -21,13 +14,21 @@ export {
 export { WhisperlyClient } from './network/WhisperlyClient';
 
 // Hooks
-export { useProjects, useProject, useGenerateApiKey, useDeleteApiKey } from './hooks/useProjects';
+export {
+  useProjects,
+  useProject,
+  useGenerateApiKey,
+  useDeleteApiKey,
+} from './hooks/useProjects';
 
 export { useDictionaries, useSearchDictionary } from './hooks/useDictionary';
 
 export { useSettings } from './hooks/useSettings';
 
-export { useProjectLanguages, useAvailableLanguages } from './hooks/useLanguages';
+export {
+  useProjectLanguages,
+  useAvailableLanguages,
+} from './hooks/useLanguages';
 
 export { useAnalytics } from './hooks/useAnalytics';
 export type { UseAnalyticsOptions } from './hooks/useAnalytics';
