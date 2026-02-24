@@ -1,39 +1,20 @@
-// Types
-export type { WhisperlyClientConfig, QueryKeys } from './types';
-export { QUERY_KEYS } from './types';
+/**
+ * @sudobility/whisperly_client
+ * React client library for Whisperly API with TanStack Query hooks
+ */
 
-// Utils
-export {
-  buildUrl,
-  handleNetworkResponse,
-  formatQueryParams,
-  WhisperlyApiError,
-} from './utils/whisperly-helpers';
-
-// Client
-export { WhisperlyClient } from './network/WhisperlyClient';
+// Network client
+export * from './network';
 
 // Hooks
-export {
-  useProjects,
-  useProject,
-  useGenerateApiKey,
-  useDeleteApiKey,
-} from './hooks/useProjects';
+export * from './hooks';
 
-export { useDictionaries, useSearchDictionary } from './hooks/useDictionary';
+// Utilities
+export * from './utils';
 
-export { useSettings } from './hooks/useSettings';
-
-export {
-  useProjectLanguages,
-  useAvailableLanguages,
-} from './hooks/useLanguages';
-
-export { useAnalytics } from './hooks/useAnalytics';
-export type { UseAnalyticsOptions } from './hooks/useAnalytics';
-
-export { useTranslate } from './hooks/useTranslate';
+// Local types
+export type { WhisperlyClientConfig, QueryKeys } from './types';
+export { QUERY_KEYS } from './types';
 
 // Re-export types from whisperly_types for convenience
 export type {
