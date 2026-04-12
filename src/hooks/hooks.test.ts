@@ -7,7 +7,12 @@ import { WhisperlyClient } from '../network/WhisperlyClient';
 import { MockNetworkClient } from '@sudobility/di/mocks';
 
 // Hooks under test
-import { useProjects, useProject, useGenerateApiKey, useDeleteApiKey } from './useProjects';
+import {
+  useProjects,
+  useProject,
+  useGenerateApiKey,
+  useDeleteApiKey,
+} from './useProjects';
 import { useDictionaries, useSearchDictionary } from './useDictionary';
 import { useProjectLanguages, useAvailableLanguages } from './useLanguages';
 import { useSettings } from './useSettings';
@@ -69,20 +74,18 @@ describe('hooks', () => {
       const mockProjects = [{ id: '1', name: 'Project 1' }];
       mockGet(`/entities/${entitySlug}/projects`, mockProjects);
 
-      const { result } = renderHook(
-        () => useProjects(client, entitySlug),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useProjects(client, entitySlug), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(result.current.data).toEqual(mockProjects);
     });
 
     it('should not fetch when entitySlug is empty', async () => {
-      const { result } = renderHook(
-        () => useProjects(client, ''),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useProjects(client, ''), {
+        wrapper: createWrapper(),
+      });
 
       // Should remain in pending state (not fetching)
       expect(result.current.fetchStatus).toBe('idle');
@@ -91,12 +94,15 @@ describe('hooks', () => {
     it('should expose createProject mutation', async () => {
       const mockProjects = [{ id: '1', name: 'Project 1' }];
       mockGet(`/entities/${entitySlug}/projects`, mockProjects);
-      mockPost(`/entities/${entitySlug}/projects`, { id: '2', project_name: 'new', display_name: 'New' });
+      mockPost(`/entities/${entitySlug}/projects`, {
+        id: '2',
+        project_name: 'new',
+        display_name: 'New',
+      });
 
-      const { result } = renderHook(
-        () => useProjects(client, entitySlug),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useProjects(client, entitySlug), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(result.current.createProject).toBeDefined();
@@ -107,10 +113,9 @@ describe('hooks', () => {
       const mockProjects = [{ id: '1', name: 'Project 1' }];
       mockGet(`/entities/${entitySlug}/projects`, mockProjects);
 
-      const { result } = renderHook(
-        () => useProjects(client, entitySlug),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useProjects(client, entitySlug), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(result.current.updateProject).toBeDefined();
@@ -121,10 +126,9 @@ describe('hooks', () => {
       const mockProjects = [{ id: '1', name: 'Project 1' }];
       mockGet(`/entities/${entitySlug}/projects`, mockProjects);
 
-      const { result } = renderHook(
-        () => useProjects(client, entitySlug),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useProjects(client, entitySlug), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(result.current.deleteProject).toBeDefined();
@@ -135,10 +139,9 @@ describe('hooks', () => {
       const mockProjects = [{ id: '1', name: 'Project 1' }];
       mockGet(`/entities/${entitySlug}/projects`, mockProjects);
 
-      const { result } = renderHook(
-        () => useProjects(client, entitySlug),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useProjects(client, entitySlug), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(typeof result.current.update).toBe('function');
@@ -160,19 +163,17 @@ describe('hooks', () => {
     });
 
     it('should not fetch when entitySlug is empty', () => {
-      const { result } = renderHook(
-        () => useProject(client, '', projectId),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useProject(client, '', projectId), {
+        wrapper: createWrapper(),
+      });
 
       expect(result.current.fetchStatus).toBe('idle');
     });
 
     it('should not fetch when projectId is empty', () => {
-      const { result } = renderHook(
-        () => useProject(client, entitySlug, ''),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useProject(client, entitySlug, ''), {
+        wrapper: createWrapper(),
+      });
 
       expect(result.current.fetchStatus).toBe('idle');
     });
@@ -240,10 +241,7 @@ describe('hooks', () => {
     });
 
     it('should expose CRUD mutations', async () => {
-      mockGet(
-        `/entities/${entitySlug}/projects/${projectId}/dictionary`,
-        []
-      );
+      mockGet(`/entities/${entitySlug}/projects/${projectId}/dictionary`, []);
 
       const { result } = renderHook(
         () => useDictionaries(client, entitySlug, projectId),
@@ -335,7 +333,9 @@ describe('hooks', () => {
       );
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
-      expect(typeof result.current.updateProjectLanguages.mutate).toBe('function');
+      expect(typeof result.current.updateProjectLanguages.mutate).toBe(
+        'function'
+      );
     });
   });
 
@@ -347,10 +347,9 @@ describe('hooks', () => {
       ];
       mockGet('/available-languages', mockLanguages);
 
-      const { result } = renderHook(
-        () => useAvailableLanguages(client),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useAvailableLanguages(client), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(result.current.data).toEqual(mockLanguages);
@@ -362,20 +361,18 @@ describe('hooks', () => {
       const mockSettings = { organization_name: 'Test Org' };
       mockGet(`/users/${userId}/settings`, mockSettings);
 
-      const { result } = renderHook(
-        () => useSettings(client, userId),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useSettings(client, userId), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(result.current.data).toEqual(mockSettings);
     });
 
     it('should not fetch when userId is empty', () => {
-      const { result } = renderHook(
-        () => useSettings(client, ''),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useSettings(client, ''), {
+        wrapper: createWrapper(),
+      });
 
       expect(result.current.fetchStatus).toBe('idle');
     });
@@ -384,10 +381,9 @@ describe('hooks', () => {
       const mockSettings = { organization_name: 'Test Org' };
       mockGet(`/users/${userId}/settings`, mockSettings);
 
-      const { result } = renderHook(
-        () => useSettings(client, userId),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useSettings(client, userId), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(typeof result.current.updateSettings.mutate).toBe('function');
@@ -399,20 +395,18 @@ describe('hooks', () => {
       const mockAnalytics = { aggregate: { total_requests: 100 } };
       mockGet(`/entities/${entitySlug}/analytics`, mockAnalytics);
 
-      const { result } = renderHook(
-        () => useAnalytics(client, entitySlug),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useAnalytics(client, entitySlug), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(result.current.data).toEqual(mockAnalytics);
     });
 
     it('should not fetch when entitySlug is empty', () => {
-      const { result } = renderHook(
-        () => useAnalytics(client, ''),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useAnalytics(client, ''), {
+        wrapper: createWrapper(),
+      });
 
       expect(result.current.fetchStatus).toBe('idle');
     });
@@ -450,10 +444,9 @@ describe('hooks', () => {
 
   describe('useTranslate', () => {
     it('should provide a mutation for translating', () => {
-      const { result } = renderHook(
-        () => useTranslate(client),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useTranslate(client), {
+        wrapper: createWrapper(),
+      });
 
       expect(typeof result.current.mutate).toBe('function');
       expect(typeof result.current.mutateAsync).toBe('function');
@@ -465,10 +458,9 @@ describe('hooks', () => {
       };
       mockPost('/translate/my-org/my-project', mockResponse);
 
-      const { result } = renderHook(
-        () => useTranslate(client),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useTranslate(client), {
+        wrapper: createWrapper(),
+      });
 
       await act(async () => {
         const response = await result.current.mutateAsync({

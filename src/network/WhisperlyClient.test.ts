@@ -105,10 +105,7 @@ describe('WhisperlyClient', () => {
       it('should update a project with PUT request', async () => {
         const updateData = { display_name: 'Updated Project' };
         const mockProject = { id: 'proj-1', display_name: 'Updated Project' };
-        mockPut(
-          `/entities/${entitySlug}/projects/${projectId}`,
-          mockProject
-        );
+        mockPut(`/entities/${entitySlug}/projects/${projectId}`, mockProject);
 
         const result = await client.updateProject(
           entitySlug,
@@ -318,7 +315,10 @@ describe('WhisperlyClient', () => {
 
     describe('updateProjectLanguages', () => {
       it('should update project languages', async () => {
-        const mockLanguages = { project_id: projectId, languages: 'en,es,fr,de' };
+        const mockLanguages = {
+          project_id: projectId,
+          languages: 'en,es,fr,de',
+        };
         mockPost(
           `/entities/${entitySlug}/projects/${projectId}/languages`,
           mockLanguages
@@ -393,7 +393,10 @@ describe('WhisperlyClient', () => {
           mockProject
         );
 
-        const result = await client.generateProjectApiKey(entitySlug, projectId);
+        const result = await client.generateProjectApiKey(
+          entitySlug,
+          projectId
+        );
 
         expect(result).toEqual(mockProject);
         const lastRequest = mockNetwork.getLastRequest();
@@ -461,8 +464,32 @@ describe('WhisperlyClient', () => {
     describe('getRateLimitHistory', () => {
       it('should fetch rate limit history for a period type', async () => {
         const mockHistory = [
-          { tier: 'free', monthly_limit: 1000, monthly_used: 10, monthly_remaining: 990, hourly_limit: 100, hourly_used: 1, hourly_remaining: 99, resets_at: { monthly: '2024-02-01T00:00:00Z', hourly: '2024-01-15T14:00:00Z' } },
-          { tier: 'free', monthly_limit: 1000, monthly_used: 20, monthly_remaining: 980, hourly_limit: 100, hourly_used: 2, hourly_remaining: 98, resets_at: { monthly: '2024-02-01T00:00:00Z', hourly: '2024-01-15T15:00:00Z' } },
+          {
+            tier: 'free',
+            monthly_limit: 1000,
+            monthly_used: 10,
+            monthly_remaining: 990,
+            hourly_limit: 100,
+            hourly_used: 1,
+            hourly_remaining: 99,
+            resets_at: {
+              monthly: '2024-02-01T00:00:00Z',
+              hourly: '2024-01-15T14:00:00Z',
+            },
+          },
+          {
+            tier: 'free',
+            monthly_limit: 1000,
+            monthly_used: 20,
+            monthly_remaining: 980,
+            hourly_limit: 100,
+            hourly_used: 2,
+            hourly_remaining: 98,
+            resets_at: {
+              monthly: '2024-02-01T00:00:00Z',
+              hourly: '2024-01-15T15:00:00Z',
+            },
+          },
         ];
         mockGet(`/ratelimits/${entitySlug}/history/hour`, mockHistory);
 
@@ -513,7 +540,12 @@ describe('WhisperlyClient', () => {
     it('should throw WhisperlyApiError on failed request', async () => {
       mockNetwork.setMockResponse(
         `${baseUrl}${apiPrefix}/entities/${entitySlug}/projects`,
-        { ok: false, status: 401, statusText: 'Unauthorized', data: { error: 'Not authenticated' } },
+        {
+          ok: false,
+          status: 401,
+          statusText: 'Unauthorized',
+          data: { error: 'Not authenticated' },
+        },
         'GET'
       );
 

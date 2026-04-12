@@ -1,5 +1,8 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
-import type { ProjectCreateRequest, ProjectUpdateRequest } from '@sudobility/whisperly_types';
+import type {
+  ProjectCreateRequest,
+  ProjectUpdateRequest,
+} from '@sudobility/whisperly_types';
 import { WhisperlyClient } from '../network/WhisperlyClient';
 import { QUERY_KEYS } from '../types';
 
@@ -24,7 +27,8 @@ export function useProjects(client: WhisperlyClient, entitySlug: string) {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: ProjectCreateRequest) => client.createProject(entitySlug, data),
+    mutationFn: (data: ProjectCreateRequest) =>
+      client.createProject(entitySlug, data),
     onSuccess: () => {
       query.refetch();
     },
@@ -44,7 +48,8 @@ export function useProjects(client: WhisperlyClient, entitySlug: string) {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (projectId: string) => client.deleteProject(entitySlug, projectId),
+    mutationFn: (projectId: string) =>
+      client.deleteProject(entitySlug, projectId),
     onSuccess: () => {
       query.refetch();
     },
@@ -69,7 +74,11 @@ export function useProjects(client: WhisperlyClient, entitySlug: string) {
  * @param projectId - The project ID to fetch. Query is disabled when empty.
  * @returns TanStack Query result spread with an `update` refetch helper
  */
-export function useProject(client: WhisperlyClient, entitySlug: string, projectId: string) {
+export function useProject(
+  client: WhisperlyClient,
+  entitySlug: string,
+  projectId: string
+) {
   const query = useQuery({
     queryKey: [QUERY_KEYS.project, entitySlug, projectId],
     queryFn: () => client.getProject(entitySlug, projectId),
@@ -90,7 +99,11 @@ export function useProject(client: WhisperlyClient, entitySlug: string, projectI
  * @param projectId - The project to generate an API key for
  * @returns TanStack mutation result for generating the API key
  */
-export function useGenerateApiKey(client: WhisperlyClient, entitySlug: string, projectId: string) {
+export function useGenerateApiKey(
+  client: WhisperlyClient,
+  entitySlug: string,
+  projectId: string
+) {
   return useMutation({
     mutationFn: () => client.generateProjectApiKey(entitySlug, projectId),
   });
@@ -104,7 +117,11 @@ export function useGenerateApiKey(client: WhisperlyClient, entitySlug: string, p
  * @param projectId - The project whose API key should be deleted
  * @returns TanStack mutation result for deleting the API key
  */
-export function useDeleteApiKey(client: WhisperlyClient, entitySlug: string, projectId: string) {
+export function useDeleteApiKey(
+  client: WhisperlyClient,
+  entitySlug: string,
+  projectId: string
+) {
   return useMutation({
     mutationFn: () => client.deleteProjectApiKey(entitySlug, projectId),
   });

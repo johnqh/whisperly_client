@@ -1,5 +1,8 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
-import type { DictionaryCreateRequest, DictionaryUpdateRequest } from '@sudobility/whisperly_types';
+import type {
+  DictionaryCreateRequest,
+  DictionaryUpdateRequest,
+} from '@sudobility/whisperly_types';
 import { WhisperlyClient } from '../network/WhisperlyClient';
 import { QUERY_KEYS } from '../types';
 
@@ -86,8 +89,15 @@ export function useSearchDictionary(
   text: string
 ) {
   const query = useQuery({
-    queryKey: [QUERY_KEYS.dictionarySearch, entitySlug, projectId, languageCode, text],
-    queryFn: () => client.searchDictionary(entitySlug, projectId, languageCode, text),
+    queryKey: [
+      QUERY_KEYS.dictionarySearch,
+      entitySlug,
+      projectId,
+      languageCode,
+      text,
+    ],
+    queryFn: () =>
+      client.searchDictionary(entitySlug, projectId, languageCode, text),
     enabled: !!entitySlug && !!projectId && !!languageCode && !!text,
   });
 

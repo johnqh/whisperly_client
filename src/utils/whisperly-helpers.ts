@@ -66,9 +66,7 @@ export class WhisperlyApiError extends Error {
  * @returns The extracted and typed response data
  * @throws {@link WhisperlyApiError} If the response indicates a failed request (`ok: false`)
  */
-export function handleNetworkResponse<T>(
-  response: NetworkResponse
-): T {
+export function handleNetworkResponse<T>(response: NetworkResponse): T {
   if (!response.ok) {
     throw new WhisperlyApiError(
       `API request failed: ${response.statusText}`,

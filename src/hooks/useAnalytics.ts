@@ -35,7 +35,8 @@ export function useAnalytics(
 
   const query = useQuery({
     queryKey: [QUERY_KEYS.analytics, entitySlug, startDate, endDate, projectId],
-    queryFn: () => client.getAnalytics(entitySlug, startDate, endDate, projectId),
+    queryFn: () =>
+      client.getAnalytics(entitySlug, startDate, endDate, projectId),
     enabled: enabled && !!entitySlug,
   });
 

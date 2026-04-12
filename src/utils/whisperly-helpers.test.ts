@@ -65,7 +65,9 @@ describe('whisperly-helpers', () => {
         data: { data: { id: 1, name: 'Test' } },
       };
 
-      const result = handleNetworkResponse<{ id: number; name: string }>(response);
+      const result = handleNetworkResponse<{ id: number; name: string }>(
+        response
+      );
       expect(result).toEqual({ id: 1, name: 'Test' });
     });
 
@@ -79,7 +81,9 @@ describe('whisperly-helpers', () => {
         data: { id: 1, name: 'Test' },
       };
 
-      const result = handleNetworkResponse<{ id: number; name: string }>(response);
+      const result = handleNetworkResponse<{ id: number; name: string }>(
+        response
+      );
       expect(result).toEqual({ id: 1, name: 'Test' });
     });
 

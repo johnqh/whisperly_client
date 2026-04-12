@@ -14,7 +14,10 @@ import { WhisperlyClient } from '../network/WhisperlyClient';
  * @returns TanStack mutation result. Call `mutate()` or `mutateAsync()` with
  *          `{ orgPath, projectName, request, apiKey? }` to trigger a translation.
  */
-export function useTranslate(client: WhisperlyClient, testMode: boolean = false) {
+export function useTranslate(
+  client: WhisperlyClient,
+  testMode: boolean = false
+) {
   return useMutation({
     mutationFn: ({
       orgPath,

@@ -28,6 +28,7 @@ export type {
   DictionaryCreateRequest,
   DictionaryUpdateRequest,
   DictionarySearchResponse,
+  DictionaryListItem,
   DictionaryLookupResponse,
   ProjectLanguagesResponse,
   AvailableLanguage,
@@ -36,8 +37,13 @@ export type {
   AnalyticsResponse,
   TranslationRequest,
   TranslationResponse,
-  RateLimitStatus,
+  RateLimitsConfigData,
+  RateLimitHistoryData,
   RateLimitTier,
+  RateLimits,
+  RateLimitUsage,
+  RateLimitResets,
+  RateLimitHistoryEntry,
   // Response wrappers
   ApiResponse,
   PaginatedResponse,
@@ -49,3 +55,5 @@ export type {
   UserCreateRequest,
   UsageRecord,
 } from '@sudobility/whisperly_types';
+
+export { RateLimitPeriodType } from '@sudobility/whisperly_types';

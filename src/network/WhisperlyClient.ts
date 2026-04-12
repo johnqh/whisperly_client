@@ -5,6 +5,7 @@ import type {
   DictionaryCreateRequest,
   DictionaryUpdateRequest,
   DictionarySearchResponse,
+  DictionaryListItem,
   ProjectLanguagesResponse,
   AvailableLanguage,
   UserSettings,
@@ -12,7 +13,8 @@ import type {
   AnalyticsResponse,
   TranslationRequest,
   TranslationResponse,
-  RateLimitStatus,
+  RateLimitsConfigData,
+  RateLimitHistoryData,
 } from '@sudobility/whisperly_types';
 import type { NetworkClient } from '@sudobility/types';
 import type { WhisperlyClientConfig } from '../types';
@@ -214,13 +216,11 @@ export class WhisperlyClient {
   async getDictionaries(
     entitySlug: string,
     projectId: string
-  ): Promise<DictionarySearchResponse[]> {
+  ): Promise<DictionaryListItem[]> {
     const response = await this.networkClient.get(
-      this.url(
-        `/entities/${entitySlug}/projects/${projectId}/dictionary`
-      )
+      this.url(`/entities/${entitySlug}/projects/${projectId}/dictionary`)
     );
-    return handleNetworkResponse<DictionarySearchResponse[]>(response);
+    return handleNetworkResponse<DictionaryListItem[]>(response);
   }
 
   /**
@@ -262,9 +262,7 @@ export class WhisperlyClient {
     data: DictionaryCreateRequest
   ): Promise<DictionarySearchResponse> {
     const response = await this.networkClient.post(
-      this.url(
-        `/entities/${entitySlug}/projects/${projectId}/dictionary`
-      ),
+      this.url(`/entities/${entitySlug}/projects/${projectId}/dictionary`),
       data
     );
     return handleNetworkResponse<DictionarySearchResponse>(response);
@@ -334,9 +332,7 @@ export class WhisperlyClient {
     projectId: string
   ): Promise<ProjectLanguagesResponse> {
     const response = await this.networkClient.get(
-      this.url(
-        `/entities/${entitySlug}/projects/${projectId}/languages`
-      )
+      this.url(`/entities/${entitySlug}/projects/${projectId}/languages`)
     );
     return handleNetworkResponse<ProjectLanguagesResponse>(response);
   }
@@ -356,9 +352,7 @@ export class WhisperlyClient {
     languages: string
   ): Promise<ProjectLanguagesResponse> {
     const response = await this.networkClient.post(
-      this.url(
-        `/entities/${entitySlug}/projects/${projectId}/languages`
-      ),
+      this.url(`/entities/${entitySlug}/projects/${projectId}/languages`),
       { languages }
     );
     return handleNetworkResponse<ProjectLanguagesResponse>(response);
@@ -454,24 +448,24 @@ export class WhisperlyClient {
   // =============================================================================
 
   /**
-   * Fetches the current rate limit status for an entity, including
-   * monthly and hourly usage, limits, and reset timestamps.
+   * Fetches the current rate limit configuration and usage for an entity,
+   * including all tiers, current entitlement, limits, and usage counts.
    *
    * @param entitySlug - The entity/organization slug identifier
    * @param testMode - When true, returns test mode rate limits (defaults to false)
-   * @returns The entity's current rate limit status
+   * @returns The entity's rate limit configuration and current usage
    * @throws {@link WhisperlyApiError} If the request fails
    */
   async getRateLimits(
     entitySlug: string,
     testMode: boolean = false
-  ): Promise<RateLimitStatus> {
+  ): Promise<RateLimitsConfigData> {
     const response = await this.networkClient.get(
       this.url(`/ratelimits/${entitySlug}`, {
         testMode: testMode ? 'true' : undefined,
       })
     );
-    return handleNetworkResponse<RateLimitStatus>(response);
+    return handleNetworkResponse<RateLimitsConfigData>(response);
   }
 
   /**
@@ -480,20 +474,20 @@ export class WhisperlyClient {
    * @param entitySlug - The entity/organization slug identifier
    * @param periodType - The time granularity for history data: `'hour'`, `'day'`, or `'month'`
    * @param testMode - When true, returns test mode history (defaults to false)
-   * @returns Array of historical rate limit usage records for the specified period
+   * @returns Historical rate limit usage data including entries and total count
    * @throws {@link WhisperlyApiError} If the request fails
    */
   async getRateLimitHistory(
     entitySlug: string,
     periodType: 'hour' | 'day' | 'month',
     testMode: boolean = false
-  ): Promise<RateLimitStatus[]> {
+  ): Promise<RateLimitHistoryData> {
     const response = await this.networkClient.get(
       this.url(`/ratelimits/${entitySlug}/history/${periodType}`, {
         testMode: testMode ? 'true' : undefined,
       })
     );
-    return handleNetworkResponse<RateLimitStatus[]>(response);
+    return handleNetworkResponse<RateLimitHistoryData>(response);
   }
 
   // =============================================================================

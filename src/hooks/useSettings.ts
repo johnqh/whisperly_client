@@ -24,7 +24,8 @@ export function useSettings(client: WhisperlyClient, userId: string) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: UserSettingsUpdateRequest) => client.updateSettings(userId, data),
+    mutationFn: (data: UserSettingsUpdateRequest) =>
+      client.updateSettings(userId, data),
     onSuccess: () => {
       query.refetch();
     },
