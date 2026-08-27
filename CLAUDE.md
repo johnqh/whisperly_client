@@ -1,5 +1,10 @@
 # CLAUDE.md - whisperly_client
 
+> **Git policy — never auto-commit or auto-push.** Leave your work in the working tree.
+> Run `git commit`, `git push`, `gh pr create`, or `scripts/push_all.sh` **only when the user
+> explicitly asks in that turn**. Approval for an earlier change does not carry forward, and
+> finishing a task is not permission to commit it.
+
 ## Project Overview
 
 `@sudobility/whisperly_client` is the typed API client library for the Whisperly platform. It provides a `WhisperlyClient` class wrapping all API endpoints and TanStack Query hooks for React data fetching.
@@ -169,3 +174,7 @@ class WhisperlyApiError extends Error {
 
 - `dist/index.js` — ESM module
 - `dist/index.d.ts` — Type declarations
+
+## Git Workflow
+
+- Do not use feature branches for code changes. Always stay on the current branch.
